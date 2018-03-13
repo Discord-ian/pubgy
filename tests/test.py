@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 async def getMatch():
-    match = await client.get_match_info(match_id="00000000-0000-0000-0000-000000000000",shard="pc-na")
+    match = await client.get_match_info()
     print(match.winner)
     print(match.id)
 

@@ -1,13 +1,14 @@
 class Match:
 
     def __init__(self, id, tel, partis):
-        self.id = id
+        self.matchid = id
         self.tel = tel
+        self.partis = partis
         # make a way to make a list of the Player class with everyone who was in the game.
 
     @property
     def id(self):
-        return self.id
+        return self.matchid
 
     @property
     def players(self):
@@ -25,17 +26,17 @@ class Match:
 class Player:
 
     def __init__(self, name, id, stats):
-        self.name = name
-        self.id = id
+        self.plyname = name
+        self.plyid = id
         self.stats = stats
 
     @property
     def name(self):
-        return self.name
+        return self.plyname
 
     @property
     def id(self):
-        return self.id
+        return self.plyid
 
 
 class Telemetry:

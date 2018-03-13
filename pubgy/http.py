@@ -12,14 +12,15 @@ log = logging.getLogger(__name__)
 class Route:
     base = BASE_URL
 
-    def __init__(self, method, shard):
+    def __init__(self, method):
         self.method = method
-        self.shard = shard
-        self.url = self.base + self.shard + "/" + self.method
+        # got rid of self.shard and shard from init
+        self.url = self.base + self.method  # no shard support
+        # self.url = self.base + self.shard + / + self.method
 
     @property
     def tool(self):
-        return '{0.shard}:{0.method}:{0.url}'.format(self)
+        return '{0.method}:{0.url}'.format(self)
 
 
 class Query:
@@ -59,24 +60,22 @@ class Query:
                 finally:
                     await r.release()
 
-    async def match_info(self, match_id, shard):
-        route = Route("matches/{}".format(match_id), shard)
+    async def match_info(self, match_id):
+        if match_id is None:
+            route = Route("matches")
+        else:
+            route = Route("matches/{}".format(match_id))
         resp = await self.request(route)
         print(resp)
-        return Match(id=match_id, tel=resp["data"][0]["asset"],partis=None)
+        return Match(id=match_id, tel=None, partis=None)
 
-    async def user_matches(self, username, shard, *parse : True):
-        route = Route("matches?filter[playerIds]={}&sort=-createdAt".format(username), shard)
+    async def user_matches(self, username, *parse : True):
+        route = Route("matches?filter[playerIds]={}&sort=-createdAt".format(username))
         resp = await self.request(route)
         resp = resp.json()
         rev = {}
         count = 0
-        for item in resp['data']:
-            name = "Match{}".format(count)
-            rev[name] = resp['data'][count]
-            count += 1
-        if parse:
-            return self.parse_match_data(rev)
+       # for item in resp['data']:\
 
     async def user_info(self, username, shard):
         route = Route("") # route not determined
