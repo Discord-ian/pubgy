@@ -3,11 +3,12 @@ import aiohttp
 import weakref
 import logging
 from .struct import Match, Player
+import constants
 log = logging.getLogger(__name__)
 
 
 class Route:
-    base = "https://api.playbattlegrounds.com/shards/"
+    base = BASE_URL
 
     def __init__(self, method, shard):
         self.method = method
@@ -23,9 +24,7 @@ class Query:
 
     def __init__(self, loop, auth):
         self.loop = loop
-        self.shards = ["xbox-as", "xbox-eu", "xbox-na", "xbox-oc",
-                       "pc-krjp", "pc-na", "pc-eu", "pc-oc", "pc-kakao",
-                       "pc-sea", "pc-sa", "pc-as"]
+        self.shards = SHARD_LIST
         self.headers = {
             "Authorization": auth,
             "Accept": "application/json"
