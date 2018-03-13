@@ -19,14 +19,15 @@ class Match:
 
     @property
     def winner(self):
-        return "Winner:"
+        return "Winner:" # temporary
 
 
 class Player:
 
-    def __init__(self, name, id):
+    def __init__(self, name, id, stats):
         self.name = name
         self.id = id
+        self.stats = stats
 
     @property
     def name(self):
