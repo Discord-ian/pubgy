@@ -1,14 +1,31 @@
-class Match:
+class Shard:
+    def __init__(self, name, id):
+        self.same = name
+        self.sid = id
 
-    def __init__(self, id, tel, partis):
-        self.matchid = id
-        self.tel = tel
-        self.partis = partis
-        # make a way to make a list of the Player class with everyone who was in the game.
+    @property
+    def name(self):
+        return self.same
 
     @property
     def id(self):
-        return self.matchid
+        return self.sid
+
+
+class Match:
+
+    def __init__(self, id, tel, partis, shard):
+        self.matchID = id
+        self.tel = tel
+        self.partis = partis
+        self.shardID = shard
+        # make a way to make a list of the Player class with everyone who was in the game.
+
+
+
+    @property
+    def id(self):
+        return self.matchID
 
     @property
     def players(self):
@@ -20,15 +37,24 @@ class Match:
 
     @property
     def winner(self):
-        return "Winner:" # temporary
+        return "Winner:"  # temporary
+
+    @property
+    def shard(self):
+        return self.shardID
 
 
 class Player:
 
-    def __init__(self, name, id, stats):
+    def __init__(self, name, id, stats, shard):
         self.plyname = name
         self.plyid = id
         self.stats = stats
+        self.shard = shard
+
+    @property
+    def shard(self):
+        return self.shard
 
     @property
     def name(self):

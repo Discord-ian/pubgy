@@ -6,10 +6,8 @@ __version__ = "1.0a" # Different whole numbers signify major changes
 
 from .pubgy import Pubgy
 from .http import Query
-from .struct import Match, Player
-
-import logging
-
+from .struct import Match, Player, Shard
+from .constants import BASE_URL, SHARD_LIST
 
 
 
