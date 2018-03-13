@@ -1,0 +1,16 @@
+DEBUG:pubgy.http:Requesting pc-na:matches/fsdfhsdfhsdifusdfh:https://pubg-api-globalelitist.herokuapp.com/pc-na/matches/fsdfhsdfhsdifusdfh
+DEBUG:pubgy.http:Requesting pc-na:matches/fsdfhsdfhsdifusdfh:https://pubg-api-globalelitist.herokuapp.com/pc-na/matches/fsdfhsdfhsdifusdfh
+ERROR:asyncio:Task exception was never retrieved
+future: <Task finished coro=<match() done, defined at test.py:11> exception=TypeError("'NoneType' object is not subscriptable",)>
+Traceback (most recent call last):
+  File "C:\Users\Aidan\AppData\Local\Programs\Python\Python35\lib\asyncio\tasks.py", line 239, in _step
+    result = coro.send(value)
+  File "test.py", line 12, in match
+    print(await client.get_match_info(match_id="fsdfhsdfhsdifusdfh",shard="pc-na"))
+  File "C:\Users\Aidan\AppData\Local\Programs\Python\Python35\lib\site-packages\pubgy\pubgy.py", line 14, in get_match_info
+    return await self.web.match_info(match_id, shard)
+  File "C:\Users\Aidan\AppData\Local\Programs\Python\Python35\lib\site-packages\pubgy\http.py", line 64, in match_info
+    return Match(id=match_id, tel=resp["data"][0]["asset"],partis=None)
+TypeError: 'NoneType' object is not subscriptable
+ERROR:asyncio:Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x000001CBF140B748>

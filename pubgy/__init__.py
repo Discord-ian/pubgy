@@ -10,7 +10,7 @@ from .struct import Match, Player
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+
 
 
 
