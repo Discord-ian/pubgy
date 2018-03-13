@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import weakref
 import logging
-
+from .struct import Match, Player
 log = logging.getLogger(__name__)
 
 
@@ -55,6 +55,36 @@ class Query:
                         return 429
                 finally:
                     await r.release()
+
+    async def match_info(self, match_id, shard):
+        route = Route("matches/{}".format(match_id), shard)
+        resp = await self.request(route)
+        resp = resp.json()
+        return Match(id=match_id, tel=resp["data"][0]["asset"])
+
+    async def user_matches(self, username, shard, *parse : True):
+        route = Route("matches?filter[playerIds]={}&sort=-createdAt".format(username), shard)
+        resp = await self.request(route)
+        resp = resp.json()
+        rev = {}
+        count = 0
+        for item in resp['data']:
+            name = "Match{}".format(count)
+            rev[name] = resp['data'][count]
+            count += 1
+        if parse:
+            return self.parse_match_data(rev)
+
+    async def user_info(self, username, shard):
+        route = Route("") #route not determined
+
+    async def parse_match_data(self, match):
+        count = 0
+        for item in range(4):
+
+
+
+
 
     @asyncio.coroutine
     async def close(self):
