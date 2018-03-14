@@ -70,3 +70,9 @@ fabric.properties
 # End of https://www.gitignore.io/api/pycharm
 
 \.idea/
+
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
