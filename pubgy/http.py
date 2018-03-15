@@ -128,11 +128,10 @@ class Query:
         """
         if len(keys) == 0:
             return ""
-        result = ""
+        result = "?"
         for k, v in keys.items():
-            result = "?{}={}&".format(k, v)
-            # do we need an & at the end? also, should we check since we don't need a ? unless its filter #1
-        return result[:-1]
+            result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
+        return result[:-1] #trim the result to remove trailing &
 
     # maintain pep8
     async def close(self):
