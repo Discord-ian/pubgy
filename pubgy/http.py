@@ -38,6 +38,7 @@ class Query:
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary({})
 
+  
     @property
     def shard(self):
         return self.shardID
@@ -106,5 +107,5 @@ class Query:
 
     # maintain pep8
     async def close(self):
-        await self.session.close()
+		await self.session.close()
 
