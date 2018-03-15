@@ -5,3 +5,4 @@ DEFAULT_SHARD = SHARD_LIST[5]
 BASE_URL = "https://api.playbattlegrounds.com/shards/"
 DEBUG_URL = "https://api.playbattlegrounds.com/status"
 SORTS = {"ascending" : "-createdAt", "descending" : "createdAt"}
+MATCHES_ROUTE = "matches"
