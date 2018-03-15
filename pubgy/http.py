@@ -33,7 +33,7 @@ class Query:
         self.sorts = SORTS
         self.headers = {
             "Authorization": auth,
-            "Accept": "application/vnd.api+json"
+            "Accept": "application/json"
         }
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary({})
