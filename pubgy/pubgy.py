@@ -9,6 +9,14 @@ class Pubgy:
         self.aloop = asyncio.get_event_loop()
         self.web = Query(self.loop, self.auth)
 
+        """
+
+        :param match_id: Defaults to None.
+        :type match_id: str or None
+        :type shard: str or None
+        :param shard: Defaults to Query.shard
+        :returns: A populated Match object.
+        """
     async def get_match_info(self, *, match_id=None, shard=None, page_length=None, page_offset=None):
         if shard is None:
             shard = self.web.shard
@@ -16,10 +24,14 @@ class Pubgy:
 
     @property
     def shard(self):
+        """
+        :returns: The Query.shard (str)
+        """
         return self.web.shard
 
     @property
     def loop(self):
+        """
+        :returns: The main asyncio loop.
+        """
         return self.aloop
-
-
