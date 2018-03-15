@@ -3,7 +3,7 @@ import aiohttp
 import weakref
 import logging
 from .struct import Match, Player, Shard
-from .constants import SHARD_LIST, BASE_URL, DEBUG_URL, SORTS
+from .constants import SHARD_LIST, DEFAULT_SHARD, BASE_URL, DEBUG_URL, SORTS
 # include a dot because its in the same directory,
 # specific import also useful
 log = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class Route:
 
 class Query:
 
-    def __init__(self, loop, auth, shard="pc-na"):
+    def __init__(self, loop, auth, shard=DEFAULT_SHARD):
         self.loop = loop
         self.shardID = shard
         self.shards = SHARD_LIST
