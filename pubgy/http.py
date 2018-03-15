@@ -112,6 +112,10 @@ class Query:
         route = Route("", shard) # route not determined
 
     def _generate_query_string(self, keyValuePairs):
+        """
+        :param keyValuePair: dictionary containing names of query params and values
+        :returns: A query param string starting in ? and seperated by & 
+        """
         if keyValuePairs.len == 0:
             return ""
         result = "?"
