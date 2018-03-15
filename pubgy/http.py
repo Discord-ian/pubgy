@@ -76,12 +76,12 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self, match_id, shard, pageLength = None, offset = 0):
+    async def match_info(self, match_id, shard, page_length = None, offset = 0):
         path = MATCHES_ROUTE
         if match_id is not None:
             path = "{}/{}".format(path, match_id)
-        if pageLength is not None:
-            path = "{}?page[length]={}&page[offset]={}".format(path, pageLength, offset)
+        if page_length is not None:
+            path = "{}?page[length]={}&page[offset]={}".format(path, page_length, offset)
         route = Route(path, shard)
         resp = await self.request(route)
         print(resp)
