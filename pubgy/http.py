@@ -79,10 +79,12 @@ class Query:
 
     async def match_info(self, match_id, shard, page_length = None, offset = 0):
         path = MATCHES_ROUTE
+        query_params = {}
         if match_id is not None:
             path = "{}/{}".format(path, match_id)
         if page_length is not None:
-            path = "{}?page[length]={}&page[offset]={}".format(path, page_length, offset)
+            query_params.update({'page[length]': page_length, 'page[offset]': offset})
+        path = path + self._generate_query_string(query_params)
         route = Route(path, shard)
         resp = await self.request(route)
         print(resp)
@@ -90,6 +92,7 @@ class Query:
 
     async def user_matches(self, username, *shard, filter = None):
         filt = filter
+        query_params = {'filter[playerIds]': username}
         if filt is None:
             filt = self.sorts["ascending"]
         elif filt in self.sorts:
@@ -97,7 +100,8 @@ class Query:
         else:
             filt = self.sorts["ascending"]
             log.error("You put in the wrong value for user_matches(filter)")
-        route = Route("matches?filter[playerIds]={}&sort={}".format(username, filt), shard)
+        query_params.update({ 'sort': filt})
+        route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
         resp = await self.request(route)
         resp = resp.json()
         rev = {}
@@ -107,7 +111,15 @@ class Query:
     async def user_info(self, username, shard):
         route = Route("", shard) # route not determined
 
+    def _generate_query_string(self, keyValuePairs):
+        if keyValuePairs.len == 0:
+            return ""
+        result = "?"
+        for k, v in keyValuePairs.items():
+            result = "{}{}={}&".format(result, k, v)
+        return result[:-1]
+
     # maintain pep8
     async def close(self):
-		await self.session.close()
+        await self.session.close()
 
