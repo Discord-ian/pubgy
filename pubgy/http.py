@@ -3,9 +3,8 @@ import aiohttp
 import weakref
 import logging
 from .struct import Match, Player, Shard
-from .constants import SHARD_LIST, DEFAULT_SHARD, BASE_URL, DEBUG_URL, SORTS, MATCHES_ROUTE
+from .constants import *
 # include a dot because its in the same directory,
-# specific import also useful
 log = logging.getLogger(__name__)
 
 
@@ -36,9 +35,9 @@ class Query:
             "Accept": "application/json"
         }
         self.session = aiohttp.ClientSession(loop=self.loop)
-        self.locks = weakref.WeakValueDictionary({})
+        self.locks = weakref.WeakValueDictionary()
+        # needs no arguments to init.
 
-  
     @property
     def shard(self):
         return self.shardID
@@ -77,7 +76,16 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self, match_id, shard, page_length = None, offset = 0):
+    async def match_info(self,shard=None, match_id=None, page_length=None, offset=0):
+        """
+
+        :param shard: Shard to get data from. Defaults to Query.shard
+        :param match_id: Match ID. Defaults to None and gets matches according to filters.
+        :param page_length: No idea what this does
+        :param offset: Tells how far down for it to start retrieving data.
+        :returns: The amount of match objects requested.
+        """
+        # remove spaces to maintain pep :P
         path = MATCHES_ROUTE
         query_params = {}
         if match_id is not None:
@@ -90,8 +98,9 @@ class Query:
         print(resp)
         return Match(id=match_id, tel=None, partis=None, shard=shard)
 
-    async def user_matches(self, username, *shard, filter = None):
-        filt = filter
+    async def user_matches(self, username, *shard, filts=None):
+        filt = filts
+        # change because filter is an internal arg
         query_params = {'filter[playerIds]': username}
         if filt is None:
             filt = self.sorts["ascending"]
@@ -100,27 +109,29 @@ class Query:
         else:
             filt = self.sorts["ascending"]
             log.error("You put in the wrong value for user_matches(filter)")
-        query_params.update({ 'sort': filt})
+            return 400
+        query_params.update({'sort': filt})
         route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
         resp = await self.request(route)
-        resp = resp.json()
-        rev = {}
-        count = 0
-       # for item in resp['data']:\
+        # for key =
+        # need to iterate over the match objects.
+        # same thing with match_info
 
     async def user_info(self, username, shard):
-        route = Route("", shard) # route not determined
+        route = Route("", shard)  # route not determined
 
-    def _generate_query_string(self, keyValuePairs):
+    def _generate_query_string(self, keys):
         """
-        :param keyValuePair: dictionary containing names of query params and values
-        :returns: A query param string starting in ? and seperated by & 
+        :param keys: dictionary containing names of query params and values
+        :type keys: dict
+        :returns: A query param string starting in ? and separated by &
         """
-        if keyValuePairs.len == 0:
+        if len(keys) == 0:
             return ""
-        result = "?"
-        for k, v in keyValuePairs.items():
-            result = "{}{}={}&".format(result, k, v)
+        result = ""
+        for k, v in keys.items():
+            result = "?{}={}&".format(k, v)
+            # do we need an & at the end? also, should we check since we don't need a ? unless its filter #1
         return result[:-1]
 
     # maintain pep8
