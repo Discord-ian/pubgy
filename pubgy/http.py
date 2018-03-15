@@ -3,7 +3,7 @@ import aiohttp
 import weakref
 import logging
 from .struct import Match, Player, Shard
-from .constants import SHARD_LIST, DEFAULT_SHARD, BASE_URL, DEBUG_URL, SORTS
+from .constants import SHARD_LIST, DEFAULT_SHARD, BASE_URL, DEBUG_URL, SORTS, MATCHES_ROUTE
 # include a dot because its in the same directory,
 # specific import also useful
 log = logging.getLogger(__name__)
@@ -76,11 +76,13 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self, match_id, shard):
-        if match_id is None:
-            route = Route("matches", shard)
-        else:
-            route = Route("matches/{}".format(match_id), shard)
+    async def match_info(self, match_id, shard, pageLength = None, offset = 0):
+        path = MATCHES_ROUTE
+        if match_id is not None:
+            path = "{}/{}".format(path, match_id)
+        if pageLength is not None:
+            path = "{}?page[length]={}&page[offset]={}".format(path, pageLength, offset)
+        route = Route(path, shard)
         resp = await self.request(route)
         print(resp)
         return Match(id=match_id, tel=None, partis=None, shard=shard)
@@ -94,7 +96,7 @@ class Query:
         else:
             filt = self.sorts["ascending"]
             log.error("You put in the wrong value for user_matches(filter)")
-        route = Route("matches?filter[playerIds]={}&sort={}".format(username, filt))
+        route = Route("matches?filter[playerIds]={}&sort={}".format(username, filt), shard)
         resp = await self.request(route)
         resp = resp.json()
         rev = {}
@@ -102,7 +104,7 @@ class Query:
        # for item in resp['data']:\
 
     async def user_info(self, username, shard):
-        route = Route("") # route not determined
+        route = Route("", shard) # route not determined
 
     # maintain pep8
     async def close(self):
