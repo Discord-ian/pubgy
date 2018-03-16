@@ -1,5 +1,11 @@
 class Shard:
     def __init__(self, name, id):
+        """
+        :param name: Shard name
+        :type name: str
+        :param id: ID of the shard
+        :type id: str
+        """
         self.same = name
         self.sid = id
 
@@ -15,10 +21,19 @@ class Shard:
 class Match:
 
     def __init__(self, id, tel, partis, shard):
+        """
+        :param id: The ID of the Match
+        :type id: str
+        :param tel: A link to the telemetry.json file
+        :type tel: str
+        :param partis: A list of Player objects
+        :type partis: List
+        :param shard: A shard object.
+        """
         self.matchID = id
         self.tel = tel
         self.partis = partis
-        self.shardID = shard
+        self.shardId = shard
         # make a way to make a list of the Player class with everyone who was in the game.
 
 
@@ -29,9 +44,6 @@ class Match:
 
     @property
     def players(self):
-        """
-        :returns: A list of Player objects.
-        """
         return self.partis
 
     @property
@@ -44,7 +56,7 @@ class Match:
 
     @property
     def shard(self):
-        return self.shardID
+        return self.shardId
 
 
 class Player:

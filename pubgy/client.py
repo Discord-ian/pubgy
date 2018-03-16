@@ -5,11 +5,16 @@ from .http import Query
 class Pubgy:
 
     def __init__(self, auth_token):
+        """
+        :param auth_token: The API Authentication token
+        :type auth_token: str
+        :returns: A Pubgy object to do requests from.
+        """
         self.auth = auth_token
         self.aloop = asyncio.get_event_loop()
         self.web = Query(self.loop, self.auth)
 
-    async def get_match_info(self, *, match_id=None, shard=None, page_length=None, page_offset=None):
+    async def match(self, match_id=None, shard=None, page_length=None, page_offset=None):
         """
         :param match_id: Defaults to None.
         :type match_id: str or None

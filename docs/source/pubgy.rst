@@ -4,6 +4,14 @@ pubgy package
 Submodules
 ----------
 
+pubgy.client module
+-------------------
+
+.. automodule:: pubgy.client
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 pubgy.constants module
 ----------------------
 
@@ -16,14 +24,6 @@ pubgy.http module
 -----------------
 
 .. automodule:: pubgy.http
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-pubgy.pubgy module
-------------------
-
-.. automodule:: pubgy.pubgy
     :members:
     :undoc-members:
     :show-inheritance:

@@ -76,8 +76,10 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self,shard=None, match_id=None, page_length=None, offset=0):
+    async def match_info(self, shard=None, match_id=None, page_length=None, offset=0):
         """
+        Gets match info from the API.
+        This function is a coroutine.
 
         :param shard: Shard to get data from. Defaults to Query.shard
         :param match_id: Match ID. Defaults to None and gets matches according to filters.
@@ -95,13 +97,14 @@ class Query:
         path = path + self._generate_query_string(query_params)
         route = Route(path, shard)
         resp = await self.request(route)
-        print(resp)
         return Match(id=match_id, tel=None, partis=None, shard=shard)
 
-    async def user_matches(self, username, *shard, filts=None):
+    async def user_match(self, username, shard=None, filts=None):
         filt = filts
         # change because filter is an internal arg
         query_params = {'filter[playerIds]': username}
+        if shard is None:
+            shard = self.shard
         if filt is None:
             filt = self.sorts["ascending"]
         elif filt in self.sorts:
@@ -113,15 +116,18 @@ class Query:
         query_params.update({'sort': filt})
         route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
         resp = await self.request(route)
-        # for key =
-        # need to iterate over the match objects.
-        # same thing with match_info
+        respList = []
+        for match in resp['data']:
+            respList.append(Match(id=match['id'],partis=None,shard=match['attributes']['shardId'],tel=None))
+        return respList
 
     async def user_info(self, username, shard):
         route = Route("", shard)  # route not determined
 
     def _generate_query_string(self, keys):
         """
+        Generates the string to give to Route.
+
         :param keys: dictionary containing names of query params and values
         :type keys: dict
         :returns: A query param string starting in ? and separated by &
@@ -131,7 +137,7 @@ class Query:
         result = "?"
         for k, v in keys.items():
             result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
-        return result[:-1] #trim the result to remove trailing &
+        return result[:-1]  # trim the result to remove trailing &
 
     # maintain pep8
     async def close(self):
