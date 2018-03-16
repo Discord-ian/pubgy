@@ -12,7 +12,7 @@ Welcome to Pubgy's documentation!
 Pubgy module
 ------------------
 
-.. automodule:: pubgy.pubgy
+.. automodule:: pubgy.client
     :members:
     :undoc-members:
     :show-inheritance:

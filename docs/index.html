@@ -87,7 +87,7 @@
               <!-- Local TOC -->
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Welcome to Pubgy’s documentation!</a><ul>
-<li><a class="reference internal" href="#pubgy-module">Pubgy module</a></li>
+<li><a class="reference internal" href="#module-pubgy.client">Pubgy module</a></li>
 </ul>
 </li>
 </ul>
@@ -157,8 +157,60 @@
 <h1>Welcome to Pubgy’s documentation!<a class="headerlink" href="#welcome-to-pubgy-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<div class="section" id="pubgy-module">
-<h2>Pubgy module<a class="headerlink" href="#pubgy-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-pubgy.client">
+<span id="pubgy-module"></span><h2>Pubgy module<a class="headerlink" href="#module-pubgy.client" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pubgy.client.Pubgy">
+<em class="property">class </em><code class="descclassname">pubgy.client.</code><code class="descname">Pubgy</code><span class="sig-paren">(</span><em>auth_token</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.client.Pubgy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.client.Pubgy.loop">
+<code class="descname">loop</code><a class="headerlink" href="#pubgy.client.Pubgy.loop" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The main asyncio loop.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pubgy.client.Pubgy.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>match_id=None</em>, <em>shard=None</em>, <em>page_length=None</em>, <em>page_offset=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.client.Pubgy.match" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>match_id</strong> (<em>str</em><em> or </em><em>None</em>) – Defaults to None.</li>
+<li><strong>shard</strong> (<em>str</em><em> or </em><em>None</em>) – Defaults to Query.shard</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A populated Match object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.client.Pubgy.shard">
+<code class="descname">shard</code><a class="headerlink" href="#pubgy.client.Pubgy.shard" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Query.shard (str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
