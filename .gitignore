@@ -75,7 +75,7 @@ fabric.properties
 __pycache__/
 *.py[cod]
 *$py.class
-<<<<<<< HEAD
+
 # Distribution / packaging
 .Python
 build/
@@ -172,5 +172,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-=======
->>>>>>> 07f7b699239c1683e5ead41ee9577aceb86facf5
+docs/_build
+docs/source
+docs/_static
+docs/_sources

@@ -9,12 +9,11 @@ Welcome to Pubgy's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+Pubgy module
+------------------
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. automodule:: pubgy.pubgy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+	

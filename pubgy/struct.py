@@ -29,6 +29,9 @@ class Match:
 
     @property
     def players(self):
+        """
+        :returns: A list of Player objects.
+        """
         return self.partis
 
     @property
