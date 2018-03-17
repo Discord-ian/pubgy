@@ -20,7 +20,7 @@ class Shard:
 
 class Match:
 
-    def __init__(self, id, tel, partis, shard):
+    def __init__(self, id: object, tel: object, partis: object, shard: object) -> object:
         """
         :param id: The ID of the Match
         :type id: str
@@ -65,11 +65,11 @@ class Player:
         self.plyname = name
         self.plyid = id
         self.stats = stats
-        self.shard = shard
+        self.shardId = shard
 
     @property
     def shard(self):
-        return self.shard
+        return self.shardId
 
     @property
     def name(self):

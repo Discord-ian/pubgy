@@ -16,6 +16,9 @@ class Pubgy:
 
     async def match(self, match_id=None, shard=None, page_length=None, page_offset=None):
         """
+        This function is a coroutine.
+        Gets specific match info depending on the parameters supplied.
+        
         :param match_id: Defaults to None.
         :type match_id: str or None
         :type shard: str or None

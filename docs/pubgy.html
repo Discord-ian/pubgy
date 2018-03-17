@@ -185,7 +185,9 @@
 <dl class="method">
 <dt id="pubgy.client.Pubgy.match">
 <code class="descname">match</code><span class="sig-paren">(</span><em>match_id=None</em>, <em>shard=None</em>, <em>page_length=None</em>, <em>page_offset=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.client.Pubgy.match" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>This function is a coroutine.
+Gets specific match info depending on the parameters supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
@@ -230,6 +232,11 @@
 <dl class="method">
 <dt id="pubgy.http.Query.close">
 <code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.get_telemetry">
+<code class="descname">get_telemetry</code><span class="sig-paren">(</span><em>resp</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.get_telemetry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -299,7 +306,7 @@ This function is a coroutine.</p>
 <span id="pubgy-struct-module"></span><h2>pubgy.struct module<a class="headerlink" href="#module-pubgy.struct" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pubgy.struct.Match">
-<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Match</code><span class="sig-paren">(</span><em>id</em>, <em>tel</em>, <em>partis</em>, <em>shard</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.struct.Match" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Match</code><span class="sig-paren">(</span><em>id: object</em>, <em>tel: object</em>, <em>partis: object</em>, <em>shard: object</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#pubgy.struct.Match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="attribute">
 <dt id="pubgy.struct.Match.id">

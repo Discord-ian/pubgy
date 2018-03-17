@@ -117,12 +117,25 @@ class Query:
         route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
         resp = await self.request(route)
         respList = []
+        tel = self.get_telemetry(resp)
         for match in resp['data']:
-            respList.append(Match(id=match['id'],partis=None,shard=match['attributes']['shardId'],tel=None))
+            respList.append(Match(id=match['id'], partis=tel['partis'], shard=match['attributes']['shardId'], tel=tel['telemetry']))
         return respList
 
     async def user_info(self, username, shard):
         route = Route("", shard)  # route not determined
+
+    def get_telemetry(self, resp):
+        partis = []
+        tel = ""
+        for key in resp['included']:
+            if key['type'] == "player":
+                partis.append(Player(name=key['attributes']['name'],id=key['id'],shard=key['attributes']['shardId'],stats=key['attributes']['stats']))
+            elif key['type'] == "asset":
+                tel = key['attributes']['URL']
+            else:
+                pass
+        return {"partis": partis, "telemetry": tel}
 
     def _generate_query_string(self, keys):
         """
