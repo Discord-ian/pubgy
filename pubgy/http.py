@@ -15,7 +15,7 @@ class Route:
         self.method = method
         self.shard = shard
         # got rid of self.shard and shard from init
-        self.url = self.base + self.method  # no shard support
+        self.url = self.base + self.shard + "/" + self.method  # no shard support
         # self.url = self.base + self.shard + / + self.method
 
     @property
@@ -32,7 +32,7 @@ class Query:
         self.sorts = SORTS
         self.headers = {
             "Authorization": auth,
-            "Accept": "application/json"
+            "Accept": "application/vnd.api+json"
         }
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary()
@@ -58,7 +58,11 @@ class Query:
                 try:
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
-                        return r.json()
+                        return await r.json()
+                    elif r.status == 401:
+                        log.error("Your API key is invalid or there was an internal server error.")
+                        self.session.close()
+                        return None
                     elif r.status == 429:
                         log.error("Too many requests.")
                         return 429
@@ -69,10 +73,7 @@ class Query:
                     await r.release()
             if errorc == 2:
                 r = await self.session.request(method='GET', url=DEBUG_URL)
-                if r.status == 401:
-                    log.error("Your API key is invalid or there was an internal server error.")
-                    self.session.close()
-                elif r.status != 200:
+                if r.status != 200:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
@@ -89,15 +90,19 @@ class Query:
         """
         # remove spaces to maintain pep :P
         path = MATCHES_ROUTE
+        if shard is None:
+            shard = self.shard
         query_params = {}
         if match_id is not None:
             path = "{}/{}".format(path, match_id)
         if page_length is not None:
-            query_params.update({'page[length]': page_length, 'page[offset]': offset})
-        path = path + self._generate_query_string(query_params)
+           query_params.update({'page[limit]': page_length, 'page[offset]': offset})
+           path = path + self._generate_query_string(query_params)
+        print(path)
         route = Route(path, shard)
         resp = await self.request(route)
-        return Match(id=match_id, tel=None, partis=None, shard=shard)
+        tel = await self.get_telemetry(resp)
+        return Match(id=resp['data'][0]['id'], partis=tel['partis'], shard=resp['data'][0]['attributes']['shardId'], tel=tel['telemetry'])
 
     async def user_match(self, username, shard=None, filts=None):
         filt = filts
@@ -125,8 +130,9 @@ class Query:
     async def user_info(self, username, shard):
         route = Route("", shard)  # route not determined
 
-    def get_telemetry(self, resp):
+    async def get_telemetry(self, resp):
         partis = []
+        resp = dict(resp)
         tel = ""
         for key in resp['included']:
             if key['type'] == "player":

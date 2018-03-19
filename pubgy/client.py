@@ -12,13 +12,19 @@ class Pubgy:
         """
         self.auth = auth_token
         self.aloop = asyncio.get_event_loop()
-        self.web = Query(self.loop, self.auth)
+        self.web = Query(self.aloop, self.auth)
 
-    async def match(self, match_id=None, shard=None, page_length=None, page_offset=None):
+    async def print_json(self, match_id=None):
+        return await self.web.match_info()
+
+    def close(self):
+        self.aloop.close()
+
+    async def match(self, match_id=None, shard=None, page_length=None, page_offset=0):
         """
         This function is a coroutine.
         Gets specific match info depending on the parameters supplied.
-        
+
         :param match_id: Defaults to None.
         :type match_id: str or None
         :type shard: str or None
