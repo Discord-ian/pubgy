@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import weakref
 import logging
-from .struct import Match, Player, Shard
+from .struct import Match, Player, Team
 from .constants import *
 # include a dot because its in the same directory,
 log = logging.getLogger(__name__)
@@ -131,17 +131,27 @@ class Query:
         route = Route("", shard)  # route not determined
 
     async def get_telemetry(self, resp):
-        partis = []
+        partis = {}
+        teams = []
+        players = []
+        teamList = []
         resp = dict(resp)
         tel = ""
         for key in resp['included']:
-            if key['type'] == "player":
-                partis.append(Player(name=key['attributes']['name'],id=key['id'],shard=key['attributes']['shardId'],stats=key['attributes']['stats']))
+            if key['type'] == "participant":
+                partis[key['id']] = Player(uid=key['id'], name=key['attributes']['stats']['name'], id=key['attributes']['stats']['playerId'], shard=key['attributes']['shardId'], stats=key['attributes']['stats'])
             elif key['type'] == "asset":
                 tel = key['attributes']['URL']
+            elif key['type'] == "roster":
+                teams.append(key)
             else:
                 pass
-        return {"partis": partis, "telemetry": tel}
+        for team in teams:
+            players = []
+            for part in team['relationships']['participants']['data']:
+                players.append(partis[part['id']])
+            teamList.append(Team(players=players, id=team['id']))
+        return {"partis": partis, "telemetry": tel, "teams": teamList}
 
     def _generate_query_string(self, keys):
         """

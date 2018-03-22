@@ -61,11 +61,16 @@ class Match:
 
 class Player:
 
-    def __init__(self, name, id, stats, shard):
+    def __init__(self, name, id, stats, shard, uid):
         self.plyname = name
         self.plyid = id
         self.stats = stats
+        self.uid = uid
         self.shardId = shard
+
+    @property
+    def uid(self):
+        return self.uid
 
     @property
     def shard(self):
@@ -88,3 +93,7 @@ class Telemetry:
     @property
     def url(self):
         return self.tel
+
+class Team:
+
+    def __init__(self, players, id):
