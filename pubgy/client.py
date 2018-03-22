@@ -18,9 +18,10 @@ class Pubgy:
         return await self.web.match_info()
 
     def close(self):
+        self.web.close()
         self.aloop.close()
 
-    async def match(self, match_id=None, shard=None, page_length=None, page_offset=0):
+    async def match(self, match_id=None, shard=None, amount=None, offset=0, filter=None):
         """
         This function is a coroutine.
         Gets specific match info depending on the parameters supplied.
@@ -29,13 +30,15 @@ class Pubgy:
         :type match_id: str or None
         :type shard: str or None
         :param shard: Defaults to Query.shard
-        :type page_length: int
-        :type page_offset: int
+        :type amount: int
+        :param amount: Defaults to 5, only returns the amount of match objects equal to length
+        :type offset: int
+        :param offset: Defaults to 0, where to start parsing the stats from.
         :returns: A populated Match object.
         """
         if shard is None:
             shard = self.web.shard
-        return await self.web.match_info(match_id=match_id, shard=shard, page_length=page_length, offset=page_offset)
+        return await self.web.match_info(match_id=match_id, shard=shard, page_length=length, offset=offset)
 
     @property
     def shard(self):

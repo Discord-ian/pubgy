@@ -77,15 +77,14 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self, shard=None, match_id=None, page_length=None, offset=0):
+    async def match_info(self, shard=None, filter=Filter(sort="-createdAt", length=5, offset=0)):
         """
         Gets match info from the API.
         This function is a coroutine.
 
         :param shard: Shard to get data from. Defaults to Query.shard
-        :param match_id: Match ID. Defaults to None and gets matches according to filters.
-        :param page_length: No idea what this does
-        :param offset: Tells how far down for it to start retrieving data.
+        :param filter: A Filter object to determine what results you want back
+        :type filter: a Filter object made with pubgy.utils.filter
         :returns: The amount of match objects requested.
         """
         # remove spaces to maintain pep :P
@@ -93,10 +92,10 @@ class Query:
         if shard is None:
             shard = self.shard
         query_params = {}
-        if match_id is not None:
-            path = "{}/{}".format(path, match_id)
+        if filter.matchid is not None:
+            path = "{}/{}".format(path, filter.matchid)
         if page_length is not None:
-           query_params.update({'page[limit]': page_length, 'page[offset]': offset})
+           query_params.update({'page[limit]': filter.length, 'page[offset]': filter.offset})
            path = path + self._generate_query_string(query_params)
         print(path)
         route = Route(path, shard)
@@ -104,27 +103,17 @@ class Query:
         tel = await self.get_telemetry(resp)
         return Match(id=resp['data'][0]['id'], partis=tel['partis'], shard=resp['data'][0]['attributes']['shardId'], tel=tel['telemetry'])
 
-    async def user_match(self, username, shard=None, filts=None):
-        filt = filts
-        # change because filter is an internal arg
-        query_params = {'filter[playerIds]': username}
+    async def user_match(self, filter, shard=None):
+        query_params = {'filter[playerIds]': filter.userid}
         if shard is None:
             shard = self.shard
-        if filt is None:
-            filt = self.sorts["ascending"]
-        elif filt in self.sorts:
-            filt = self.sorts[filt]
-        else:
-            filt = self.sorts["ascending"]
-            log.error("You put in the wrong value for user_matches(filter)")
-            return 400
-        query_params.update({'sort': filt})
+        query_params.update({'sort': filter.sort})
         route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
         resp = await self.request(route)
         respList = []
-        tel = self.get_telemetry(resp)
+        tel = await self.get_telemetry(resp)
         for match in resp['data']:
-            respList.append(Match(id=match['id'], partis=tel['partis'], shard=match['attributes']['shardId'], tel=tel['telemetry']))
+            respList.append(Match(id=match['id'], partis=tel['teams'], shard=match['attributes']['shardId'], tel=tel['telemetry']))
         return respList
 
     async def user_info(self, username, shard):
@@ -150,10 +139,10 @@ class Query:
             players = []
             for part in team['relationships']['participants']['data']:
                 players.append(partis[part['id']])
-            teamList.append(Team(players=players, id=team['id']))
+            teamList.append(Team(players=players, id=team['id'], data=team))
         return {"partis": partis, "telemetry": tel, "teams": teamList}
 
-    def _generate_query_string(self, keys):
+    def _generate_query_string(self, filter):
         """
         Generates the string to give to Route.
 
@@ -164,11 +153,10 @@ class Query:
         if len(keys) == 0:
             return ""
         result = "?"
-        for k, v in keys.items():
+        for k, v in filter.sorts:
             result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &
 
     # maintain pep8
     async def close(self):
         await self.session.close()
-
