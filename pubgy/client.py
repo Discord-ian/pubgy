@@ -21,7 +21,7 @@ class Pubgy:
         self.web.close()
         self.aloop.close()
 
-    async def match(self, match_id=None, shard=None, amount=None, offset=0, filter=None):
+    async def match(self, shard=None, sorts=None, filter=None):
         """
         This function is a coroutine.
         Gets specific match info depending on the parameters supplied.
@@ -38,7 +38,7 @@ class Pubgy:
         """
         if shard is None:
             shard = self.web.shard
-        return await self.web.match_info(match_id=match_id, shard=shard, page_length=length, offset=offset)
+        return await self.web.match_info(shard=shard, sorts=sorts, filter=filters)
 
     @property
     def shard(self):

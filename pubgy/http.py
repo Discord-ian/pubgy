@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import weakref
 import logging
-from .struct import Match, Player, Team
+from .struct import *
 from .constants import *
 # include a dot because its in the same directory,
 log = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class Query:
                     log.error("The API is down or unreachable.")
                     self.session.close()
 
-    async def match_info(self, shard=None, filter=Filter(sort="-createdAt", length=5, offset=0)):
+    async def match_info(self, shard=None, filter=None, sorts=None):
         """
         Gets match info from the API.
         This function is a coroutine.
@@ -85,6 +85,8 @@ class Query:
         :param shard: Shard to get data from. Defaults to Query.shard
         :param filter: A Filter object to determine what results you want back
         :type filter: a Filter object made with pubgy.utils.filter
+        :param sorts: A more direct method of interacting with the api.
+        :type sorts: A dict filled with sorting methods
         :returns: The amount of match objects requested.
         """
         # remove spaces to maintain pep :P
@@ -92,29 +94,21 @@ class Query:
         if shard is None:
             shard = self.shard
         query_params = {}
+        if filter is None and sorts is None:
+            filter = Filter(sort="-createdAt", length=5)
+        elif filter is None and sorts is not None:
+            filter = Filter(sorts=sorts)
         if filter.matchid is not None:
             path = "{}/{}".format(path, filter.matchid)
-        if page_length is not None:
+        if filter.length is not None and if filter.offset is not None and if filter.sorts is None:
            query_params.update({'page[limit]': filter.length, 'page[offset]': filter.offset})
            path = path + self._generate_query_string(query_params)
-        print(path)
+        elif filter.sorts is not None:
+                path = path + self._generate_query_string(filter.sorts)
         route = Route(path, shard)
         resp = await self.request(route)
         tel = await self.get_telemetry(resp)
         return Match(id=resp['data'][0]['id'], partis=tel['partis'], shard=resp['data'][0]['attributes']['shardId'], tel=tel['telemetry'])
-
-    async def user_match(self, filter, shard=None):
-        query_params = {'filter[playerIds]': filter.userid}
-        if shard is None:
-            shard = self.shard
-        query_params.update({'sort': filter.sort})
-        route = Route(MATCHES_ROUTE + self._generate_query_string(query_params), shard)
-        resp = await self.request(route)
-        respList = []
-        tel = await self.get_telemetry(resp)
-        for match in resp['data']:
-            respList.append(Match(id=match['id'], partis=tel['teams'], shard=match['attributes']['shardId'], tel=tel['telemetry']))
-        return respList
 
     async def user_info(self, username, shard):
         route = Route("", shard)  # route not determined
