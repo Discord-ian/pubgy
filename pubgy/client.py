@@ -14,10 +14,10 @@ class Pubgy:
         self.aloop = asyncio.get_event_loop()
         self.web = Query(self.aloop, self.auth)
 
-    async def print_json(self, match_id=None):
-        return await self.web.match_info()
-
     def close(self):
+        """
+        Closes both the webloop and the asyncio loop. Run before ending your own clients loop.
+        """
         self.web.close()
         self.aloop.close()
 
@@ -39,6 +39,15 @@ class Pubgy:
         if shard is None:
             shard = self.web.shard
         return await self.web.match_info(shard=shard, sorts=sorts, filter=filters)
+
+    async def solve(self, telemetry):
+        """
+        This function is a coroutine.
+        Puts a Telemetry object into a useful set of data.
+
+        :param telemetry: A telemetry object that has just been recieved from a match.
+        :type telemetry: A Telemetry object with only telemetry.url filled.
+        """
 
     @property
     def shard(self):

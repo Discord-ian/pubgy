@@ -4,7 +4,6 @@ import weakref
 import logging
 from .struct import *
 from .constants import *
-# include a dot because its in the same directory,
 log = logging.getLogger(__name__)
 
 
@@ -14,9 +13,7 @@ class Route:
     def __init__(self, method, shard):
         self.method = method
         self.shard = shard
-        # got rid of self.shard and shard from init
-        self.url = self.base + self.shard + "/" + self.method  # no shard support
-        # self.url = self.base + self.shard + / + self.method
+        self.url = self.base + self.shard + "/" + self.method
 
     @property
     def tool(self):
@@ -36,7 +33,6 @@ class Query:
         }
         self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary()
-        # needs no arguments to init.
 
     @property
     def shard(self):
@@ -89,7 +85,6 @@ class Query:
         :type sorts: A dict filled with sorting methods
         :returns: The amount of match objects requested.
         """
-        # remove spaces to maintain pep :P
         path = MATCHES_ROUTE
         if shard is None:
             shard = self.shard
@@ -110,9 +105,6 @@ class Query:
         tel = await self.get_telemetry(resp)
         return Match(id=resp['data'][0]['id'], partis=tel['partis'], shard=resp['data'][0]['attributes']['shardId'], tel=tel['telemetry'])
 
-    async def user_info(self, username, shard):
-        route = Route("", shard)  # route not determined
-
     async def get_telemetry(self, resp):
         partis = {}
         teams = []
@@ -123,12 +115,15 @@ class Query:
         for key in resp['included']:
             if key['type'] == "participant":
                 partis[key['id']] = Player(uid=key['id'], name=key['attributes']['stats']['name'], id=key['attributes']['stats']['playerId'], shard=key['attributes']['shardId'], stats=key['attributes']['stats'])
+                if key['attributes']['stats']['place'] == 1:
+                    winner = partis[key['id']]
             elif key['type'] == "asset":
                 tel = key['attributes']['URL']
             elif key['type'] == "roster":
                 teams.append(key)
             else:
                 pass
+        # figure out if we need to parse solo matches differently than squads and duos
         for team in teams:
             players = []
             for part in team['relationships']['participants']['data']:
@@ -140,13 +135,20 @@ class Query:
         """
         Generates the string to give to Route.
 
-        :param keys: dictionary containing names of query params and values
-        :type keys: dict
+        :param keys: Filter object
+        :type filter: A filter object
         :returns: A query param string starting in ? and separated by &
         """
         if len(keys) == 0:
             return ""
         result = "?"
+        if filter.sorts is None:
+
+            if filter.length is not None:
+                result = "{}page[limit]={}&".format(result, filter.length)
+            if filter.offset is not None:
+                result = "{}page[offset]={}&".format(result, filter.offset)
+            # need to add more filters to distinguish between players, etc
         for k, v in filter.sorts:
             result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &

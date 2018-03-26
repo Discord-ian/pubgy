@@ -1,6 +1,7 @@
+import pubgy.http
 class Match:
 
-    def __init__(self, id: object, tel: object, partis: object, shard: object) -> object:
+    def __init__(self, id, tel, partis, shard, winner):
         """
         :param id: The ID of the Match
         :type id: str
@@ -14,6 +15,7 @@ class Match:
         self.tel = tel
         self.partis = partis
         self.shardId = shard
+        self.winner = winner
         # make a way to make a list of the Player class with everyone who was in the game.
 
 
@@ -32,7 +34,7 @@ class Match:
 
     @property
     def winner(self):
-        return "Winner:"  # temporary
+        return self.winner
 
     @property
     def shard(self):
@@ -63,6 +65,13 @@ class Player:
     @property
     def id(self):
         return self.plyid
+
+    async def matches(filter=None):
+        if filter is None:
+            filter = Filter(username=self.plyname)
+        else:
+            filter.username = self.plyname
+
 
 
 class Telemetry:
@@ -100,7 +109,7 @@ class Team:
 
 class Filter:
 
-    def __init__(self, sort, length, offset, matchid=None, username=None, userid=None):
+    def __init__(self, sort, length=None, offset=None, matchid=None, username=None, userid=None):
         self.sort = sort
         self.length = length
         self.offset = offset
@@ -108,12 +117,8 @@ class Filter:
         self.username = username
         self.userid = userid
         self.sorts = {}
-        if self.sort != String():
-            for item in self.sort:
-                self.sorts["sort"]
-        else:
-            self.sorts.append(self.sort)
-
+        if self.sort is not str():
+            self.sorts = self.sort
 
     @property
     def length(self):
