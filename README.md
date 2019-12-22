@@ -1,2 +1,4 @@
 # pubgy
-Python Wrapper for interacting with the PUBG API. Docs are hosted at http://pubgy.aidanb.me
+### Not functional. Don't intend to maintain any time soon.
+
+~~Python Wrapper for interacting with the PUBG API~~
