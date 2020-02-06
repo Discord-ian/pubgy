@@ -1,4 +1,5 @@
 # pubgy
-### Not functional. Don't intend to maintain any time soon.
 
-~~Python Wrapper for interacting with the PUBG API~~
+Python Wrapper for interacting with the PUBG API
+
+Not fully functional, but working with V16.2.0

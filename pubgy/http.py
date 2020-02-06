@@ -1,8 +1,10 @@
 import asyncio
 import aiohttp
 import weakref
+import time
 import logging
 from .struct import *
+import json
 from .constants import *
 log = logging.getLogger(__name__)
 
@@ -10,14 +12,18 @@ log = logging.getLogger(__name__)
 class Route:
     base = BASE_URL
 
-    def __init__(self, method, shard):
+    def __init__(self, method, shard, id=""):
         self.method = method
         self.shard = shard
-        self.url = self.base + self.shard + "/" + self.method
+        self.id = id
+        if "?filter[" in self.method:
+            self.url = self.base + self.shard + "/" + self.method + self.id
+        else:
+            self.url = self.base + self.shard + "/" + self.method + "/" + self.id
 
     @property
     def tool(self):
-        return '{0.shard}:{0.method} : {0.url}'.format(self)
+        return '{0.shard}:{0.method}:{0.id}: {0.url}'.format(self)
 
 
 class Query:
@@ -26,12 +32,12 @@ class Query:
         self.loop = loop
         self.shardID = shard
         self.shards = SHARD_LIST
-        self.sorts = SORTS
+        #self.sorts = SORTS
         self.headers = {
             "Authorization": auth,
             "Accept": "application/vnd.api+json"
         }
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        #self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary()
 
     @property
@@ -48,32 +54,69 @@ class Query:
                 self.locks[tool] = lock
         errorc = 0
         async with lock:
-            for tries in range(2):
-                r = await self.session.request(method='GET', url=url, headers=self.headers)
-                log.debug(msg="Requesting {}".format(tool))
-                try:
+            async with aiohttp.ClientSession(loop=self.loop) as session:
+                print(tool)
+                for tries in range(2):
+                    r = await session.request(method='GET', url=url, headers=self.headers)
+                    #log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
+                        #await self.session.close()
                         return await r.json()
                     elif r.status == 401:
                         log.error("Your API key is invalid or there was an internal server error.")
-                        self.session.close()
                         return None
                     elif r.status == 429:
                         log.error("Too many requests.")
                         return 429
                     else:
-                        log.error("Some other error has occured. Investigating. . . ")
-                        errorc += 1
-                finally:
-                    await r.release()
-            if errorc == 2:
-                r = await self.session.request(method='GET', url=DEBUG_URL)
-                if r.status != 200:
-                    log.error("The API is down or unreachable.")
-                    self.session.close()
+                        errors = await r.json()
+                        log.error("{} | Some other error has occured. Investigating. . . | {} - {}".format(r.status, errors['errors'][0]['title'], errors['errors'][0]['detail']))
+                        break
+                if errorc == 2:
+                    r = await session.request(method='GET', url=DEBUG_URL)
+                    if r.status != 200:
+                        log.error("The API is down or unreachable.")
+                await session.close()
+                await r.release()
 
-    async def match_info(self, shard=None, filter=None, sorts=None):
+    async def sample_info(self, length=1, shard=None):
+        """
+        Gets
+        :param shard:
+        :return:
+        """
+        if shard is None:
+            shard = self.shard
+        route = Route(SAMPLE_ROUTE, shard)
+        resp = await self.request(route)
+        list = await self.check_type(resp)
+        return await self.match_info(id=list[length])
+
+    async def get_player(self, shard=None, name=None, id=None):
+        if shard is None:
+            shard = self.shard
+        if name is not None:
+            route = Route(PLAYERNAME_ROUTE, shard, name)
+            resp = await self.request(route)
+            data = resp["data"][0]
+            id_list = []
+            for item in data["relationships"]["matches"]["data"]:
+                id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
+            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
+        else:
+            if "," in id:
+                route = Route(PLAYERIDLIST, shard, id)
+            else:
+                route = Route(PLAYERID_ROUTE, shard, id)
+            resp = await self.request(route)
+            data = resp["data"]
+                if "," in id:
+                return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
+
+
+
+    async def match_info(self, shard=None, id=None, sorts=None):
         """
         Gets match info from the API.
         This function is a coroutine.
@@ -81,6 +124,7 @@ class Query:
         :param shard: Shard to get data from. Defaults to Query.shard
         :param filter: A Filter object to determine what results you want back
         :type filter: a Filter object made with pubgy.utils.filter
+        :type id: Match ID. If none is provided, it will return 5 match objects.
         :param sorts: A more direct method of interacting with the api.
         :type sorts: A dict filled with sorting methods
         :returns: The amount of match objects requested.
@@ -89,47 +133,96 @@ class Query:
         if shard is None:
             shard = self.shard
         query_params = {}
-        if filter is None and sorts is None:
-            filter = Filter(sort="-createdAt", length=5)
-        elif filter is None and sorts is not None:
-            filter = Filter(sorts=sorts)
-        if filter.matchid is not None:
-            path = "{}/{}".format(path, filter.matchid)
-        if filter.length is not None and if filter.offset is not None and if filter.sorts is None:
-           query_params.update({'page[limit]': filter.length, 'page[offset]': filter.offset})
-           path = path + self._generate_query_string(query_params)
-        elif filter.sorts is not None:
-                path = path + self._generate_query_string(filter.sorts)
-        route = Route(path, shard)
+        if id is not None and not isinstance(id, list):
+            route = Route(path, shard, id=id)
+        elif isinstance(id, list):
+            log.info("Requesting {} matches...".format(len(id)))
+            matches = []
+            i = 0
+            for match in id:
+                if i != 50:
+                    i += 1
+                    route = Route(path, shard, id=match)
+                    resp = await self.request(route)
+                    matches.append(await self.check_type(resp))
+            return matches
+        else:
+            route = Route(path, shard)
         resp = await self.request(route)
-        tel = await self.get_telemetry(resp)
-        return Match(id=resp['data'][0]['id'], partis=tel['partis'], shard=resp['data'][0]['attributes']['shardId'], tel=tel['telemetry'])
+        #with open("match.json", "w") as file:
+        #    json.dump(resp, file)         #obtain a sample match file so i can format this garbage
+        return await self.check_type(resp)
 
-    async def get_telemetry(self, resp):
-        partis = {}
-        teams = []
-        players = []
-        teamList = []
+    async def check_type(self, resp):
+        """
+        Checks if data recieved was a sample object, or something else.
+        This function is a coroutine.
+        
+        :param resp: Response from self.request()
+        :type resp: Dict or json
+        """
+        match_list = []
         resp = dict(resp)
         tel = ""
-        for key in resp['included']:
-            if key['type'] == "participant":
-                partis[key['id']] = Player(uid=key['id'], name=key['attributes']['stats']['name'], id=key['attributes']['stats']['playerId'], shard=key['attributes']['shardId'], stats=key['attributes']['stats'])
-                if key['attributes']['stats']['place'] == 1:
-                    winner = partis[key['id']]
-            elif key['type'] == "asset":
-                tel = key['attributes']['URL']
-            elif key['type'] == "roster":
-                teams.append(key)
-            else:
-                pass
-        # figure out if we need to parse solo matches differently than squads and duos
-        for team in teams:
-            players = []
-            for part in team['relationships']['participants']['data']:
-                players.append(partis[part['id']])
-            teamList.append(Team(players=players, id=team['id'], data=team))
-        return {"partis": partis, "telemetry": tel, "teams": teamList}
+        if resp["data"]["type"] == "sample":
+            shard = resp["data"]["attributes"]["shardId"]
+            match_list = []
+            for match in resp["data"]["relationships"]["matches"]["data"]:
+                match_list.append(match["id"])
+            return match_list
+        else:
+            return await self.parse_resp(resp)
+
+
+    async def parse_resp(self, resp):
+        resp = dict(resp)
+        ply_list = []
+        winners = []
+        shardId = []
+        for_matches = {}
+        with open('out.json', "w") as out:
+            json.dump(resp, out)
+        for item in resp["included"]:
+            if item["type"] == "participant":
+                cshard = item["attributes"]["shardId"]
+                if cshard not in for_matches:
+                    for_matches[cshard] = []
+                print(item)
+                for_matches[cshard].append(item["attributes"]["stats"]["playerId"])
+        await self._get_player_matches(for_matches)
+                #if item["attributes"]["shardId"] not in shardId:
+                #    shardId.append(item["attributes"]["shardId"])
+                #ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+                #if item["attributes"]["stats"]["winPlace"] == 1:
+                #    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+        #toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners)
+        #return toReturn
+
+    async def _get_player_matches(self, idlist):
+        finallist = {}
+        tosend = {}
+        for item in idlist:
+            if item not in tosend:
+                tosend[item] = []
+            while len(idlist[item]) != 0:
+                tosend[item].append(idlist[item][:10])
+                for topop in idlist[item][:10]:
+                    idlist[item].remove(topop)
+        for shard in tosend:
+            for request in tosend[shard]:
+                formatted = ""
+                for item in request:
+                    formatted += (item + ",")
+                resp = await self.get_player(id=formatted[:-1], shard=shard)
+
+
+
+    def _find_matches(self, data):
+
+        id_list = []
+        for item in data["relationships"]["matches"]["data"]:
+            id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
+        return id_list
 
     def _generate_query_string(self, filter):
         """

@@ -1,21 +1,18 @@
 import pubgy.http
 class Match:
 
-    def __init__(self, id, tel, partis, shard, winner):
+    def __init__(self, id, participants, shard, winners):
         """
         :param id: The ID of the Match
         :type id: str
-        :param tel: A link to the telemetry.json file
-        :type tel: str
         :param partis: A list of Player objects
         :type partis: List
         :param shard: A shard object.
         """
         self.matchID = id
-        self.tel = tel
-        self.partis = partis
+        self.participants = participants
         self.shardId = shard
-        self.winner = winner
+        self.winner = winners
         # make a way to make a list of the Player class with everyone who was in the game.
 
 
@@ -26,14 +23,10 @@ class Match:
 
     @property
     def players(self):
-        return self.partis
+        return self.participants
 
     @property
-    def telemetry(self):
-        return Telemetry(self.tel)
-
-    @property
-    def winner(self):
+    def winners(self):
         return self.winner
 
     @property
@@ -43,34 +36,32 @@ class Match:
 
 class Player:
 
-    def __init__(self, name, id, stats, shard, uid):
-        self.plyname = name
-        self.plyid = id
-        self.stats = stats
-        self.uid = uid
-        self.shardId = shard
-
-    @property
-    def uid(self):
-        return self.uid
+    def __init__(self, name, id, uid, stats, shard, matchlist=None):
+        self._name = name
+        self._uid = uid
+        self._id = id
+        self._shard = shard
+        self._matches = matchlist
 
     @property
     def shard(self):
-        return self.shardId
+        return self._shard
+
+    @property
+    def uid(self):
+        return self._uid
 
     @property
     def name(self):
-        return self.plyname
+        return self._name
 
     @property
     def id(self):
-        return self.plyid
+        return self._id
 
-    async def matches(filter=None):
-        if filter is None:
-            filter = Filter(username=self.plyname)
-        else:
-            filter.username = self.plyname
+    @property
+    def matches(self):
+        return self._matches
 
 
 
@@ -109,16 +100,16 @@ class Team:
 
 class Filter:
 
-    def __init__(self, sort, length=None, offset=None, matchid=None, username=None, userid=None):
-        self.sort = sort
+    def __init__(self, sort=None, length=None, offset=None, matchid=None, username=None, userid=None):
+        #self.sort = sort
         self.length = length
         self.offset = offset
         self.matchid = matchid
         self.username = username
         self.userid = userid
         self.sorts = {}
-        if self.sort is not str():
-            self.sorts = self.sort
+        #if self.sort is not str():
+            #self.sorts = self.sort
 
     @property
     def length(self):
@@ -147,3 +138,27 @@ class Filter:
     @property
     def userid(self):
         return self.userid
+
+    @length.setter
+    def length(self, value):
+        self._length = value
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
+
+    @matchid.setter
+    def matchid(self, value):
+        self._matchid = value
+
+    @username.setter
+    def username(self, value):
+        self._username = value
+
+    @userid.setter
+    def userid(self, value):
+        self._userid = value
+
+    @sorts.setter
+    def sorts(self, value):
+        self._sorts = value

@@ -14,20 +14,58 @@ class Pubgy:
         self.aloop = asyncio.get_event_loop()
         self.web = Query(self.aloop, self.auth)
 
-    def close(self):
+    async def close(self):
         """
         Closes both the webloop and the asyncio loop. Run before ending your own clients loop.
         """
-        self.web.close()
-        self.aloop.close()
+        await self.web.close()
+        await self.aloop.close()
 
-    async def match(self, shard=None, sorts=None, filter=None):
+
+    async def player(self, plyname):
+        """
+        This function is a coroutine.
+        Gets a player's stats by using either their player name or account id.
+
+        Note: If given a list of player names/ids, they all must be the same type.
+        :param plyname: A Players name/ID
+        :type plyname: str or list
+        :param accountid:
+        :type: str:
+        :return: A Player object or list of Player objects.
+        """
+        if isinstance(plyname, list):
+            if plyname[0][:8] == "account.":
+                return await self.web.get_player(id=plyname)
+            else:
+                return await self.web.get_player(name=plyname)
+        else:
+            if plyname[:8] == "account.":
+                return await self.web.get_player(id=plyname)
+            else:
+                return await self.web.get_player(name=plyname)
+    async def samples(self, shard=None, amount=1):
+        """
+        This function is a coroutine.
+        Gets sample matches from the /samples endpoint
+
+        :param match_id: Defaults to None.
+        :type match_id: str or None
+        :type shard: str or None
+        :param shard: Defaults to Query.shard
+        :type amount: int
+        :param amount: Defaults to 1, only returns the amount of match objects equal to length
+        :returns: A populated Match object or a list of Match objects if amount > 1
+        """
+        return await self.web.sample_info(shard=shard, length=amount)
+
+    async def matches(self, id, shard=None, sorts=None, filter=None):
         """
         This function is a coroutine.
         Gets specific match info depending on the parameters supplied.
 
-        :param match_id: Defaults to None.
-        :type match_id: str or None
+        :param id: Required.
+        :type id: str
         :type shard: str or None
         :param shard: Defaults to Query.shard
         :type amount: int
@@ -36,16 +74,14 @@ class Pubgy:
         :param offset: Defaults to 0, where to start parsing the stats from.
         :returns: A populated Match object.
         """
-        if shard is None:
-            shard = self.web.shard
-        return await self.web.match_info(shard=shard, sorts=sorts, filter=filters)
+        return await self.web.match_info(id=id, shard=shard, sorts=sorts)
 
     async def solve(self, telemetry):
         """
         This function is a coroutine.
         Puts a Telemetry object into a useful set of data.
 
-        :param telemetry: A telemetry object that has just been recieved from a match.
+        :param telemetry: A telemetry object that has just been received from a match.
         :type telemetry: A Telemetry object with only telemetry.url filled.
         """
 
