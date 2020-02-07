@@ -55,7 +55,6 @@ class Query:
         errorc = 0
         async with lock:
             async with aiohttp.ClientSession(loop=self.loop) as session:
-                print(tool)
                 for tries in range(2):
                     r = await session.request(method='GET', url=url, headers=self.headers)
                     #log.debug(msg="Requesting {}".format(tool))
@@ -107,14 +106,17 @@ class Query:
         else:
             if "," in id:
                 route = Route(PLAYERIDLIST, shard, id)
+                resp = await self.request(route)
+                data = resp["data"]
+                ply_list = []
+                for player in data:
+                    ply_list.append(Player(name=player["attributes"]["name"], id=player["id"], stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"], uid=None, matchlist=None))
+                return ply_list
             else:
                 route = Route(PLAYERID_ROUTE, shard, id)
             resp = await self.request(route)
             data = resp["data"]
-                if "," in id:
-                return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
-
-
+            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
 
     async def match_info(self, shard=None, id=None, sorts=None):
         """
@@ -180,26 +182,25 @@ class Query:
         winners = []
         shardId = []
         for_matches = {}
-        with open('out.json', "w") as out:
+        with open('samples/out.json', "w") as out:
             json.dump(resp, out)
         for item in resp["included"]:
             if item["type"] == "participant":
                 cshard = item["attributes"]["shardId"]
                 if cshard not in for_matches:
                     for_matches[cshard] = []
-                print(item)
                 for_matches[cshard].append(item["attributes"]["stats"]["playerId"])
-        await self._get_player_matches(for_matches)
-                #if item["attributes"]["shardId"] not in shardId:
-                #    shardId.append(item["attributes"]["shardId"])
-                #ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
-                #if item["attributes"]["stats"]["winPlace"] == 1:
-                #    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
-        #toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners)
-        #return toReturn
+        #await self._get_player_matches(for_matches)
+                if item["attributes"]["shardId"] not in shardId:
+                    shardId.append(item["attributes"]["shardId"])
+                ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+                if item["attributes"]["stats"]["winPlace"] == 1:
+                    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners)
+        return toReturn
 
     async def _get_player_matches(self, idlist):
-        finallist = {}
+        finallist = []
         tosend = {}
         for item in idlist:
             if item not in tosend:
@@ -214,11 +215,12 @@ class Query:
                 for item in request:
                     formatted += (item + ",")
                 resp = await self.get_player(id=formatted[:-1], shard=shard)
+                finallist.append(resp)
+        return finallist
 
 
 
     def _find_matches(self, data):
-
         id_list = []
         for item in data["relationships"]["matches"]["data"]:
             id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))

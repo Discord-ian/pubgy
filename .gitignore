@@ -17,11 +17,11 @@
 .idea/**/sqlDataSources.xml
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
-
+token
 # Gradle:
 .idea/**/gradle.xml
 .idea/**/libraries
-
+build.sh
 # CMake
 cmake-build-debug/
 

@@ -1,9 +1,18 @@
 from setuptools import setup
+from pubgy import __version__ as v
+with open("README.md") as info:
+    desc = info.read()
+print(desc)
 setup(
-   name='Pubgy',
-   version='1.3.1a',
-   description='Python Wrapper for interacting with the PUBG API. Docs are hosted at http://pubgy.aidanb.me',
-   author='Aidan B',
-   author_email='discord.ian@yahoo.com',
-   packages=['pubgy'],  #same as name
+   name='PUBGy',
+   version=v,
+   description="PUBG API wrapper for Python",
+   long_description=desc,
+   long_description_content_type="text/markdown",
+   url="https://github.com/Discord-ian/pubgy",
+   author='Discordian',
+   author_email='me.discordian@gmail.com',
+   packages=['pubgy'],
+   install_requires=['asyncio', 'aiohttp'],
+   python_requires='~=3.5'
 )
