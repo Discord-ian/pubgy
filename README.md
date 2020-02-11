@@ -19,7 +19,8 @@ cd pubgy
 python setup.py install
 ```
 
+
 ## Documentation
 
 Documentation has not been completed, although it is on the way.
- Reading the docstrings within the module would be the best way to approach it.
+Reading the docstrings within the module would be the best way to approach it.
