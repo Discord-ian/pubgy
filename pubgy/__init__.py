@@ -8,4 +8,4 @@ from .client import *
 from .http import Query
 from .struct import Match, Player, Team, Filter
 from .constants import *
-from .utils.filter import *
+from .utils import filter

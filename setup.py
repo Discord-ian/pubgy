@@ -12,7 +12,7 @@ setup(
    url="https://github.com/Discord-ian/pubgy",
    author='Discordian',
    author_email='me.discordian@gmail.com',
-   packages=['pubgy'],
+   packages=['pubgy', 'pubgy.utils'],
    install_requires=['asyncio', 'aiohttp'],
    python_requires='~=3.5'
 )
