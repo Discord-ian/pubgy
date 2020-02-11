@@ -22,6 +22,8 @@ token
 .idea/**/gradle.xml
 .idea/**/libraries
 build.sh
+samples
+test.py
 # CMake
 cmake-build-debug/
 
@@ -176,3 +178,4 @@ docs/_build
 docs/source
 docs/_static
 docs/_sources
+examples/

@@ -57,10 +57,10 @@ class Query:
             async with aiohttp.ClientSession(loop=self.loop) as session:
                 for tries in range(2):
                     r = await session.request(method='GET', url=url, headers=self.headers)
-                    #log.debug(msg="Requesting {}".format(tool))
+                    log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
-                        #await self.session.close()
+                        await self.session.close()
                         return await r.json()
                     elif r.status == 401:
                         log.error("Your API key is invalid or there was an internal server error.")
