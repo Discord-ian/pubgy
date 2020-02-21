@@ -22,7 +22,7 @@ class Pubgy:
         await self.aloop.close()
 
 
-    async def player(self, plyname):
+    async def player(self, plyname, shard=None):
         """
         This function is a coroutine.
         Gets a player's stats by using either their player name or account id.
@@ -36,14 +36,14 @@ class Pubgy:
         """
         if isinstance(plyname, list):
             if plyname[0][:8] == "account.":
-                return await self.web.get_player(id=plyname)
+                return await self.web.get_player(id=plyname, shard=shard)
             else:
-                return await self.web.get_player(name=plyname)
+                return await self.web.get_player(name=plyname, shard=shard)
         else:
             if plyname[:8] == "account.":
-                return await self.web.get_player(id=plyname)
+                return await self.web.get_player(id=plyname, shard=shard)
             else:
-                return await self.web.get_player(name=plyname)
+                return await self.web.get_player(name=plyname, shard=shard)
     async def samples(self, shard=None, amount=1):
         """
         This function is a coroutine.

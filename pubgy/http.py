@@ -44,6 +44,19 @@ class Query:
     def shard(self):
         return self.shardID
 
+    def _check_shard(self, shard):
+        if shard not in self.shards:
+            log.warn("Invalid shard passed. Defaulting to {}".format(self.shardID))
+            return self.shardID
+        else:
+            return shard
+
+    def _find_matches(self, data):
+        id_list = []
+        for item in data["relationships"]["matches"]["data"]:
+            id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
+        return id_list
+
     async def request(self, route):
         tool = route.tool
         url = route.url
@@ -60,10 +73,9 @@ class Query:
                     log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
-                        await self.session.close()
                         return await r.json()
                     elif r.status == 401:
-                        log.error("Your API key is invalid or there was an internal server error.")
+                        log.warn("Your API key is invalid or there was an internal server error.")
                         return None
                     elif r.status == 429:
                         log.error("Too many requests.")
@@ -85,16 +97,14 @@ class Query:
         :param shard:
         :return:
         """
-        if shard is None:
-            shard = self.shard
+        shard = self._check_shard(shard)
         route = Route(SAMPLE_ROUTE, shard)
         resp = await self.request(route)
         list = await self.check_type(resp)
         return await self.match_info(id=list[length])
 
     async def get_player(self, shard=None, name=None, id=None):
-        if shard is None:
-            shard = self.shard
+        shard = self._check_shard(shard)
         if name is not None:
             route = Route(PLAYERNAME_ROUTE, shard, name)
             resp = await self.request(route)
@@ -132,8 +142,7 @@ class Query:
         :returns: The amount of match objects requested.
         """
         path = MATCHES_ROUTE
-        if shard is None:
-            shard = self.shard
+        shard = self._check_shard(shard)
         query_params = {}
         if id is not None and not isinstance(id, list):
             route = Route(path, shard, id=id)
@@ -182,8 +191,6 @@ class Query:
         winners = []
         shardId = []
         for_matches = {}
-        with open('samples/out.json', "w") as out:
-            json.dump(resp, out)
         for item in resp["included"]:
             if item["type"] == "participant":
                 cshard = item["attributes"]["shardId"]
@@ -193,9 +200,9 @@ class Query:
         #await self._get_player_matches(for_matches)
                 if item["attributes"]["shardId"] not in shardId:
                     shardId.append(item["attributes"]["shardId"])
-                ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+                ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
                 if item["attributes"]["stats"]["winPlace"] == 1:
-                    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"],matchlist=self._find_matches(item)))
+                    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
         toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners)
         return toReturn
 
@@ -220,11 +227,7 @@ class Query:
 
 
 
-    def _find_matches(self, data):
-        id_list = []
-        for item in data["relationships"]["matches"]["data"]:
-            id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
-        return id_list
+
 
     def _generate_query_string(self, filter):
         """

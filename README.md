@@ -2,7 +2,9 @@
 
 **Python Wrapper for interacting with the PUBG API**
 
-*Not fully functional, but working with V16.2.0*
+*Not fully functional, but working with V17.1.0*
+
+All current features are shown in /examples/get_player_name.py
 
 PyPI: https://pypi.org/project/pubgy/
 ## Installation
