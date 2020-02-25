@@ -1,6 +1,7 @@
 # PUBGy
 [![Supported Versions](https://img.shields.io/pypi/pyversions/pubgy.svg)](https://pypi.org/project/PUBGy/)
 [![PyPI Release](https://img.shields.io/pypi/v/pubgy.svg)](https://pypi.org/project/PUBGy/)
+[![CodeFactor](https://www.codefactor.io/repository/github/discord-ian/pubgy/badge)](https://www.codefactor.io/repository/github/discord-ian/pubgy)
 
 **Python Wrapper for interacting with the PUBG API**
 
