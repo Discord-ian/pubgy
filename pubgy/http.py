@@ -12,19 +12,24 @@ log = logging.getLogger(__name__)
 class Route:
     base = BASE_URL
 
-    def __init__(self, method, shard, id=""):
-        self.method = method
+    def __init__(self, method, shard=None, id="", url=None):
+        self._method = method
         self.shard = shard
         self.id = id
         if "?filter[" in self.method:
-            self.url = self.base + self.shard + "/" + self.method + self.id
+            self.url = self.base + self.shard + "/" + self._method + self.id
+        elif self._method == "telemetry":
+            self.url = url
         else:
-            self.url = self.base + self.shard + "/" + self.method + "/" + self.id
+            self.url = self.base + self.shard + "/" + self._method + "/" + self.id
 
     @property
     def tool(self):
         return '{0.shard}:{0.method}:{0.id}: {0.url}'.format(self)
 
+    @property
+    def method(self):
+        return self._method
 
 class Query:
 
@@ -37,6 +42,11 @@ class Query:
             "Authorization": auth,
             "Accept": "application/vnd.api+json"
         }
+        self.headers_gzip = {
+            "Authorization": auth,
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip"
+        }
         #self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary()
 
@@ -46,7 +56,7 @@ class Query:
 
     def _check_shard(self, shard):
         if shard not in self.shards:
-            log.warn("Invalid shard passed. Defaulting to {}".format(self.shardID))
+            log.warning("Invalid shard passed. Defaulting to {}".format(self.shardID))
             return self.shardID
         else:
             return shard
@@ -73,16 +83,16 @@ class Query:
                     log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
-                        return await r.json()
+                        return json.loads(await r.text())
                     elif r.status == 401:
-                        log.warn("Your API key is invalid or there was an internal server error.")
+                        log.warning("Your API key is invalid or there was an internal server error.")
                         return None
                     elif r.status == 429:
                         log.error("Too many requests.")
                         return 429
                     else:
                         errors = await r.json()
-                        log.error("{} | Some other error has occured. Investigating. . . | {} - {}".format(r.status, errors['errors'][0]['title'], errors['errors'][0]['detail']))
+                        log.error("{} | Some other error has occured. {} - {}".format(r.status, errors['errors'][0]['title'], errors['errors'][0].get('detail')))
                         break
                 if errorc == 2:
                     r = await session.request(method='GET', url=DEBUG_URL)
@@ -92,16 +102,11 @@ class Query:
                 await r.release()
 
     async def sample_info(self, length=1, shard=None):
-        """
-        Gets
-        :param shard:
-        :return:
-        """
         shard = self._check_shard(shard)
         route = Route(SAMPLE_ROUTE, shard)
         resp = await self.request(route)
         list = await self.check_type(resp)
-        return await self.match_info(id=list[length])
+        return await self.match_info(id=list[:length], shard=shard)
 
     async def get_player(self, shard=None, name=None, id=None):
         shard = self._check_shard(shard)
@@ -160,8 +165,6 @@ class Query:
         else:
             route = Route(path, shard)
         resp = await self.request(route)
-        #with open("match.json", "w") as file:
-        #    json.dump(resp, file)         #obtain a sample match file so i can format this garbage
         return await self.check_type(resp)
 
     async def check_type(self, resp):
@@ -203,7 +206,10 @@ class Query:
                 ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
                 if item["attributes"]["stats"]["winPlace"] == 1:
                     winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
-        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners)
+            elif item["type"] == "asset":
+                if item["attributes"]["name"] == "telemetry":
+                    tel_url = item["attributes"]["URL"]
+        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners, telemetry = tel_url)
         return toReturn
 
     async def _get_player_matches(self, idlist):
@@ -224,6 +230,14 @@ class Query:
                 resp = await self.get_player(id=formatted[:-1], shard=shard)
                 finallist.append(resp)
         return finallist
+
+    async def solve_telemetry(self, telemetry):
+        url = Route(method="telemetry", url=telemetry)
+        resp = await self.request(url)
+        eventlist = {"PlayerJoin": [], "PlayerLeave": []}
+        tracked = ["LogPlayerLogin", "LogPlayerLogout"]
+        #for item in resp:
+        #    if item["_T"] in tracked:
 
 
 

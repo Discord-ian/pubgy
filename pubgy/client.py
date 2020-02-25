@@ -21,17 +21,15 @@ class Pubgy:
         await self.web.close()
         await self.aloop.close()
 
-
     async def player(self, plyname, shard=None):
         """
         This function is a coroutine.
         Gets a player's stats by using either their player name or account id.
 
-        Note: If given a list of player names/ids, they all must be the same type.
+        If given a list of player names/ids, they all must be the same type.
+        
         :param plyname: A Players name/ID
         :type plyname: str or list
-        :param accountid:
-        :type: str:
         :return: A Player object or list of Player objects.
         """
         if isinstance(plyname, list):
@@ -44,15 +42,14 @@ class Pubgy:
                 return await self.web.get_player(id=plyname, shard=shard)
             else:
                 return await self.web.get_player(name=plyname, shard=shard)
+
     async def samples(self, shard=None, amount=1):
         """
         This function is a coroutine.
         Gets sample matches from the /samples endpoint
 
-        :param match_id: Defaults to None.
-        :type match_id: str or None
         :type shard: str or None
-        :param shard: Defaults to Query.shard
+        :param shard: Defaults to shard passed on client initialization
         :type amount: int
         :param amount: Defaults to 1, only returns the amount of match objects equal to length
         :returns: A populated Match object or a list of Match objects if amount > 1
@@ -62,6 +59,7 @@ class Pubgy:
     async def matches(self, id, shard=None, sorts=None, filter=None):
         """
         This function is a coroutine.
+
         Gets specific match info depending on the parameters supplied.
 
         :param id: Required.
@@ -79,16 +77,21 @@ class Pubgy:
     async def solve(self, telemetry):
         """
         This function is a coroutine.
+
         Puts a Telemetry object into a useful set of data.
 
         :param telemetry: A telemetry object that has just been received from a match.
         :type telemetry: A Telemetry object with only telemetry.url filled.
         """
+        return await self.web.solve_telemetry(telemetry)
 
     @property
     def shard(self):
         """
-        :returns: The Query.shard (str)
+        Returns the shard the client was initiated with. This is used as the default shard for all commands,
+        unless another one is passed
+
+        :returns: str 
         """
         return self.web.shard
 

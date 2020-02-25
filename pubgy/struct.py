@@ -1,7 +1,7 @@
 from pubgy.constants import *
 class Match:
 
-    def __init__(self, id, participants, shard, winners, matchType=None):
+    def __init__(self, id, participants, shard, winners, telemetry, matchType=None):
         """
         :param id: The ID of the Match
         :type id: str
@@ -12,6 +12,7 @@ class Match:
         self.matchID = id
         self.participants = participants
         self.shardId = shard
+        self.tel = telemetry
         if matchType in MATCH_TYPES:
             self.matchType = matchType
         else:
@@ -37,6 +38,9 @@ class Match:
     def shard(self):
         return self.shardId
 
+    @property
+    def telemetry(self):
+        return self.tel
 
 class Player:
 
@@ -62,6 +66,7 @@ class Player:
     @property
     def id(self):
         return self._id
+
     @property
     def matches(self):
         return self._matches

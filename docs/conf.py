@@ -12,17 +12,17 @@
 #
 import os
 import sys
-sys.path.append(os.path.abspath('../pubgy'))
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'PUGBy'
+project = 'PUBGy'
 copyright = '2020, Discordian'
 author = 'Discordian'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.0'
+release = '1.0.5'
 
 
 # -- General configuration ---------------------------------------------------
@@ -46,7 +46,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+import rtcat_sphinx_theme
+
+html_theme = "rtcat_sphinx_theme"
+
+html_theme_path = [rtcat_sphinx_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
