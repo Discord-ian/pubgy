@@ -2,6 +2,7 @@ import asyncio
 import aiohttp
 import weakref
 import time
+from .exceptions import *
 import logging
 from .struct import *
 import json
@@ -56,10 +57,8 @@ class Query:
 
     def _check_shard(self, shard):
         if shard not in self.shards:
-            log.warning("Invalid shard passed. Defaulting to {}".format(self.shardID))
-            return self.shardID
-        else:
-            return shard
+            raise InvalidShard("Passed shard of {}, which is invalid.".format(shard))
+        return shard
 
     def _find_matches(self, data):
         id_list = []
@@ -85,8 +84,7 @@ class Query:
                         log.debug(msg="Request {} returned: 200".format(tool))
                         return json.loads(await r.text())
                     elif r.status == 401:
-                        log.warning("Your API key is invalid or there was an internal server error.")
-                        return None
+                        raise InvalidAPIKey("Your API key is invalid")
                     elif r.status == 429:
                         log.error("Too many requests.")
                         return 429
@@ -127,8 +125,7 @@ class Query:
                 for player in data:
                     ply_list.append(Player(name=player["attributes"]["name"], id=player["id"], stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"], uid=None, matchlist=None))
                 return ply_list
-            else:
-                route = Route(PLAYERID_ROUTE, shard, id)
+            route = Route(PLAYERID_ROUTE, shard, id)
             resp = await self.request(route)
             data = resp["data"]
             return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
@@ -162,8 +159,7 @@ class Query:
                     resp = await self.request(route)
                     matches.append(await self.check_type(resp))
             return matches
-        else:
-            route = Route(path, shard)
+        route = Route(path, shard)
         resp = await self.request(route)
         return await self.check_type(resp)
 
@@ -200,7 +196,6 @@ class Query:
                 if cshard not in for_matches:
                     for_matches[cshard] = []
                 for_matches[cshard].append(item["attributes"]["stats"]["playerId"])
-        #await self._get_player_matches(for_matches)
                 if item["attributes"]["shardId"] not in shardId:
                     shardId.append(item["attributes"]["shardId"])
                 ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
@@ -233,11 +228,7 @@ class Query:
 
     async def solve_telemetry(self, telemetry):
         url = Route(method="telemetry", url=telemetry)
-        resp = await self.request(url)
-        eventlist = {"PlayerJoin": [], "PlayerLeave": []}
-        tracked = ["LogPlayerLogin", "LogPlayerLogout"]
-        #for item in resp:
-        #    if item["_T"] in tracked:
+        return await parse.telemetry(self.request(url))
 
 
 

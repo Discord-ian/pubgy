@@ -1,5 +1,6 @@
 import asyncio
 from .http import Query
+from .parse import Parser
 
 
 class Pubgy:
@@ -13,6 +14,7 @@ class Pubgy:
         self.auth = auth_token
         self.aloop = asyncio.get_event_loop()
         self.web = Query(self.aloop, self.auth)
+        self.parse = Parser(self.web)
 
     async def close(self):
         """
