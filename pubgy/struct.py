@@ -1,7 +1,10 @@
 from pubgy.constants import *
+import json
+
+
 class Match:
 
-    def __init__(self, id, participants, shard, winners, telemetry, matchType=None):
+    def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None):
         """
         :param id: The ID of the Match
         :type id: str
@@ -18,13 +21,16 @@ class Match:
         else:
             self.matchType = "Unknown Match Type"
         self.winner = winners
+        self._map = TEL_REF[map]
         # make a way to make a list of the Player class with everyone who was in the game.
-
-
 
     @property
     def id(self):
         return self.matchID
+
+    @property
+    def map(self):
+        return self._map
 
     @property
     def players(self):
@@ -41,6 +47,7 @@ class Match:
     @property
     def telemetry(self):
         return self.tel
+
 
 class Player:
 
@@ -72,15 +79,47 @@ class Player:
         return self._matches
 
 
-
 class Telemetry:
 
-    def __init__(self, telemetry):
+    def __init__(self, telemetry, url=None, match=None):
+        self._url = url
         self.tel = telemetry
+        self._match = match
+        self._damageEvents = []
+        self._movements = []
+        self.all = []
 
     @property
     def url(self):
-        return self.tel
+        return self._url
+
+    @property
+    def match(self):
+        return self._match
+
+    @property
+    def full(self):
+        return self.all
+
+    def damage_events(self):
+        if self._damageEvents:
+            return self._damageEvents
+        for item in self.tel:
+            self.all.append(item)
+            if item["_T"] == "LogPlayerTakeDamage":
+                self._damageEvents.append(item)  # {"cause": })
+        return self._damageEvents
+
+    def movements(self):
+        if self._movements:
+            return self._movements
+        for item in self.tel:
+            if item["_T"] == "LogPlayerPosition":
+                self._movements.append({"time": item["_D"], "name": item["character"]["name"],
+                                        "position": {"x": item["character"]["location"]["x"],
+                                                     "y": item["character"]["location"]["y"]}})
+        return self._movements
+
 
 class Team:
 
@@ -106,18 +145,19 @@ class Team:
     def place(self):
         return self.place
 
+
 class Filter:
 
     def __init__(self, sort=None, length=None, offset=None, matchid=None, username=None, userid=None):
-        #self.sort = sort
+        # self.sort = sort
         self.length = length
         self.offset = offset
         self.matchid = matchid
         self.username = username
         self.userid = userid
         self.sorts = {}
-        #if self.sort is not str():
-            #self.sorts = self.sort
+        # if self.sort is not str():
+        # self.sorts = self.sort
 
     @property
     def length(self):
@@ -170,3 +210,23 @@ class Filter:
     @sorts.setter
     def sorts(self, value):
         self._sorts = value
+
+
+class Stats:
+
+    def __init__(self, inputs):
+        self.kills = self.Kills(inputs)
+
+    class Kills:
+
+        def __init__(self, inputs):
+            self.car = inputs["roadKills"]
+            self.daily = inputs["dailyKills"]
+            self.assists = inputs["assists"]
+            self.weekly = inputs["weeklyKills"]
+            self.team = inputs["teamKills"]
+            self.total = inputs["kills"]  # shadows stats.kills
+
+        @property
+        def __repr__(self):
+            return self.total

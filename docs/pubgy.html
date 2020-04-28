@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pubgy package &mdash; Pubgy 1.0.2a documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Pubgy 1.0.2a documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Pubgy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">pubgy package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-pubgy.client">pubgy.client module</a></li>
+<li><a class="reference internal" href="#module-pubgy.constants">pubgy.constants module</a></li>
+<li><a class="reference internal" href="#module-pubgy.http">pubgy.http module</a></li>
+<li><a class="reference internal" href="#module-pubgy.struct">pubgy.struct module</a></li>
+<li><a class="reference internal" href="#module-pubgy">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Pubgy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>pubgy package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pubgy.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pubgy-package">
+<h1>pubgy package<a class="headerlink" href="#pubgy-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pubgy.client">
+<span id="pubgy-client-module"></span><h2>pubgy.client module<a class="headerlink" href="#module-pubgy.client" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pubgy.client.Pubgy">
+<em class="property">class </em><code class="descclassname">pubgy.client.</code><code class="descname">Pubgy</code><span class="sig-paren">(</span><em>auth_token</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.client.Pubgy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.client.Pubgy.loop">
+<code class="descname">loop</code><a class="headerlink" href="#pubgy.client.Pubgy.loop" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The main asyncio loop.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pubgy.client.Pubgy.match">
+<code class="descname">match</code><span class="sig-paren">(</span><em>match_id=None</em>, <em>shard=None</em>, <em>page_length=None</em>, <em>page_offset=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.client.Pubgy.match" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a coroutine.
+Gets specific match info depending on the parameters supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>match_id</strong> (<em>str</em><em> or </em><em>None</em>) – Defaults to None.</li>
+<li><strong>shard</strong> (<em>str</em><em> or </em><em>None</em>) – Defaults to Query.shard</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A populated Match object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.client.Pubgy.shard">
+<code class="descname">shard</code><a class="headerlink" href="#pubgy.client.Pubgy.shard" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The Query.shard (str)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pubgy.constants">
+<span id="pubgy-constants-module"></span><h2>pubgy.constants module<a class="headerlink" href="#module-pubgy.constants" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pubgy.http">
+<span id="pubgy-http-module"></span><h2>pubgy.http module<a class="headerlink" href="#module-pubgy.http" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pubgy.http.Query">
+<em class="property">class </em><code class="descclassname">pubgy.http.</code><code class="descname">Query</code><span class="sig-paren">(</span><em>loop</em>, <em>auth</em>, <em>shard='pc-na'</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="pubgy.http.Query.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.get_telemetry">
+<code class="descname">get_telemetry</code><span class="sig-paren">(</span><em>resp</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.get_telemetry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.match_info">
+<code class="descname">match_info</code><span class="sig-paren">(</span><em>shard=None</em>, <em>match_id=None</em>, <em>page_length=None</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.match_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets match info from the API.
+This function is a coroutine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>shard</strong> – Shard to get data from. Defaults to Query.shard</li>
+<li><strong>match_id</strong> – Match ID. Defaults to None and gets matches according to filters.</li>
+<li><strong>page_length</strong> – No idea what this does</li>
+<li><strong>offset</strong> – Tells how far down for it to start retrieving data.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The amount of match objects requested.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.request">
+<code class="descname">request</code><span class="sig-paren">(</span><em>route</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.http.Query.shard">
+<code class="descname">shard</code><a class="headerlink" href="#pubgy.http.Query.shard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.user_info">
+<code class="descname">user_info</code><span class="sig-paren">(</span><em>username</em>, <em>shard</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.user_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pubgy.http.Query.user_match">
+<code class="descname">user_match</code><span class="sig-paren">(</span><em>username</em>, <em>shard=None</em>, <em>filts=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Query.user_match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pubgy.http.Route">
+<em class="property">class </em><code class="descclassname">pubgy.http.</code><code class="descname">Route</code><span class="sig-paren">(</span><em>method</em>, <em>shard</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.http.Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.http.Route.base">
+<code class="descname">base</code><em class="property"> = 'https://api.playbattlegrounds.com/shards/'</em><a class="headerlink" href="#pubgy.http.Route.base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.http.Route.tool">
+<code class="descname">tool</code><a class="headerlink" href="#pubgy.http.Route.tool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pubgy.struct">
+<span id="pubgy-struct-module"></span><h2>pubgy.struct module<a class="headerlink" href="#module-pubgy.struct" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pubgy.struct.Match">
+<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Match</code><span class="sig-paren">(</span><em>id: object</em>, <em>tel: object</em>, <em>partis: object</em>, <em>shard: object</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#pubgy.struct.Match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.struct.Match.id">
+<code class="descname">id</code><a class="headerlink" href="#pubgy.struct.Match.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Match.players">
+<code class="descname">players</code><a class="headerlink" href="#pubgy.struct.Match.players" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Match.shard">
+<code class="descname">shard</code><a class="headerlink" href="#pubgy.struct.Match.shard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Match.telemetry">
+<code class="descname">telemetry</code><a class="headerlink" href="#pubgy.struct.Match.telemetry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Match.winner">
+<code class="descname">winner</code><a class="headerlink" href="#pubgy.struct.Match.winner" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pubgy.struct.Player">
+<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Player</code><span class="sig-paren">(</span><em>name</em>, <em>id</em>, <em>stats</em>, <em>shard</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.struct.Player" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.struct.Player.id">
+<code class="descname">id</code><a class="headerlink" href="#pubgy.struct.Player.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Player.name">
+<code class="descname">name</code><a class="headerlink" href="#pubgy.struct.Player.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Player.shard">
+<code class="descname">shard</code><a class="headerlink" href="#pubgy.struct.Player.shard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pubgy.struct.Shard">
+<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Shard</code><span class="sig-paren">(</span><em>name</em>, <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.struct.Shard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.struct.Shard.id">
+<code class="descname">id</code><a class="headerlink" href="#pubgy.struct.Shard.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pubgy.struct.Shard.name">
+<code class="descname">name</code><a class="headerlink" href="#pubgy.struct.Shard.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pubgy.struct.Telemetry">
+<em class="property">class </em><code class="descclassname">pubgy.struct.</code><code class="descname">Telemetry</code><span class="sig-paren">(</span><em>telemetry</em><span class="sig-paren">)</span><a class="headerlink" href="#pubgy.struct.Telemetry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="pubgy.struct.Telemetry.url">
+<code class="descname">url</code><a class="headerlink" href="#pubgy.struct.Telemetry.url" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pubgy">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pubgy" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Aidan B.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.2a',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

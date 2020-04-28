@@ -1,6 +1,7 @@
 import asyncio
 from .http import Query
 from .parse import Parser
+from .exceptions import InvalidPlayerID
 
 
 class Pubgy:
@@ -34,6 +35,9 @@ class Pubgy:
         :type plyname: str or list
         :return: A Player object or list of Player objects.
         """
+        # check if plyname is actually a bot
+        if not self.checkifbot(plyname):
+            return InvalidPlayerID
         if isinstance(plyname, list):
             if plyname[0][:8] == "account.":
                 return await self.web.get_player(id=plyname, shard=shard)
@@ -44,6 +48,21 @@ class Pubgy:
                 return await self.web.get_player(id=plyname, shard=shard)
             else:
                 return await self.web.get_player(name=plyname, shard=shard)
+
+    async def stats(self, id=None, name=None, shard=None):
+        if id is None:
+            ply = await self.web.get_player(name=name, shard=shard)
+            id = ply.id
+        return await self.web.get_stats(shard=shard, id=id, season="all")
+
+    async def generate_telemetry(self, telemetry, match=None):
+        """
+
+        :param telemetry:
+        :type telemetry: str
+        :return:
+        """
+        return await self.parse.telemetry(telemetry, match=match)
 
     async def samples(self, shard=None, amount=1):
         """
@@ -103,3 +122,12 @@ class Pubgy:
         :returns: The main asyncio loop.
         """
         return self.aloop
+
+    def checkifbot(self, playernames):
+        if isinstance(list, playernames):
+            for id in playernames:
+                if "ai." in id:
+                    return False
+        else:
+            if "ai." in playernames:
+                return False

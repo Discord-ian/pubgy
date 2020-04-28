@@ -15,12 +15,15 @@ class Route:
 
     def __init__(self, method, shard=None, id="", url=None):
         self._method = method
+        self._url = url
         self.shard = shard
         self.id = id
-        if "?filter[" in self.method:
+        if "?filter[" in self._method:
             self.url = self.base + self.shard + "/" + self._method + self.id
         elif self._method == "telemetry":
             self.url = url
+        elif self._method == "stats":
+            self.url = self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
         else:
             self.url = self.base + self.shard + "/" + self._method + "/" + self.id
 
@@ -31,6 +34,7 @@ class Route:
     @property
     def method(self):
         return self._method
+
 
 class Query:
 
@@ -57,7 +61,8 @@ class Query:
 
     def _check_shard(self, shard):
         if shard not in self.shards:
-            raise InvalidShard("Passed shard of {}, which is invalid.".format(shard))
+            #raise InvalidShard("Passed shard of {}, which is invalid.".format(shard))
+            shard = self.shardID
         return shard
 
     def _find_matches(self, data):
@@ -183,7 +188,6 @@ class Query:
         else:
             return await self.parse_resp(resp)
 
-
     async def parse_resp(self, resp):
         resp = dict(resp)
         ply_list = []
@@ -204,7 +208,7 @@ class Query:
             elif item["type"] == "asset":
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
-        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners, telemetry = tel_url)
+        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners, telemetry=tel_url, map=resp["data"]["attributes"]["mapName"])
         return toReturn
 
     async def _get_player_matches(self, idlist):
@@ -226,13 +230,12 @@ class Query:
                 finallist.append(resp)
         return finallist
 
-    async def solve_telemetry(self, telemetry):
-        url = Route(method="telemetry", url=telemetry)
-        return await parse.telemetry(self.request(url))
-
-
-
-
+    async def get_stats(self, id, shard, season):
+        shard = self._check_shard(shard)
+        url = Route(url=STATS[season], shard=shard, id=id, method="stats")
+        resp = await self.request(url)
+        print(resp["data"]["attributes"]["gameModeStats"]["solo"])
+        return Stats(resp["data"]["attributes"]["gameModeStats"]["solo"])
 
     def _generate_query_string(self, filter):
         """

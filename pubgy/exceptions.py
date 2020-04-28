@@ -16,3 +16,5 @@ class InvalidAPIKey(PUBGError):
     pass
 
 
+class InvalidPlayerID(PUBGError):
+    pass
