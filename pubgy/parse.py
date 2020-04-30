@@ -1,7 +1,7 @@
 import json
 from .http import Query, Route
 from .constants import *
-from .struct import Telemetry
+from .objects import Telemetry
 
 
 class Parser:

@@ -1,9 +1,12 @@
 from pubgy.constants import *
 import json
+"""
+All objects created by calling pubgy.client are layed out here.
+"""
 
 
 class Match:
-
+    
     def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None):
         """
         :param id: The ID of the Match

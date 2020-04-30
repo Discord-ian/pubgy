@@ -4,7 +4,7 @@ import weakref
 import time
 from .exceptions import *
 import logging
-from .struct import *
+from .objects import *
 import json
 from .constants import *
 log = logging.getLogger(__name__)
@@ -118,9 +118,9 @@ class Query:
             resp = await self.request(route)
             data = resp["data"][0]
             id_list = []
-            for item in data["relationships"]["matches"]["data"]:
-                id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
-            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
+            #for item in data["relationships"]["matches"]["data"]:
+            #    id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
+            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None)# #matchlist=self._find_matches(data))
         else:
             if "," in id:
                 route = Route(PLAYERIDLIST, shard, id)
@@ -234,7 +234,6 @@ class Query:
         shard = self._check_shard(shard)
         url = Route(url=STATS[season], shard=shard, id=id, method="stats")
         resp = await self.request(url)
-        print(resp["data"]["attributes"]["gameModeStats"]["solo"])
         return Stats(resp["data"]["attributes"]["gameModeStats"]["solo"])
 
     def _generate_query_string(self, filter):
