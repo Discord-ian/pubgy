@@ -9,7 +9,9 @@
 .idea/**/tasks.xml
 pubgy/visual/*
 .idea/dictionaries
-
+pubgy/utils/filter.py
+resp.json
+tel.json
 # Sensitive or high-churn files:
 .idea/**/dataSources/
 .idea/**/dataSources.ids
