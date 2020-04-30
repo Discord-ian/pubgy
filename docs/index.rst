@@ -27,6 +27,5 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
-   pubgy
-   objects
+   reference
 

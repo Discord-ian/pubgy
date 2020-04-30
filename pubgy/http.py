@@ -153,6 +153,7 @@ class Query:
         query_params = {}
         if id is not None and not isinstance(id, list):
             route = Route(path, shard, id=id)
+            print(route.url)
         elif isinstance(id, list):
             log.info("Requesting {} matches...".format(len(id)))
             matches = []
@@ -164,7 +165,7 @@ class Query:
                     resp = await self.request(route)
                     matches.append(await self.check_type(resp))
             return matches
-        route = Route(path, shard)
+        #route = Route(path, shard)
         resp = await self.request(route)
         return await self.check_type(resp)
 
