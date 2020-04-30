@@ -34,7 +34,7 @@ extensions = ['sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-
+master_doc = 'index'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
@@ -46,22 +46,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#import guzzle_sphinx_theme
+import sphinx_readable_theme
 
-#html_theme_path = guzzle_sphinx_theme.html_theme_path()
-#html_theme = 'basicstrap'
-import sphinx_nameko_theme
-html_theme = 'nameko'
-html_experimental_html5_writer = True
-html_theme_path = [sphinx_nameko_theme.get_html_theme_path()]
-# Register the theme as an extension to generate a sitemap.xml
-#extensions.append("sphinxjp.themes.basicstrap")
+html_theme_path = [sphinx_readable_theme.get_html_theme_path()]
+html_theme = 'readable'
 
 # Guzzle theme options (see theme.conf for more information)
-html_theme_options = {
-    # Set the name of the project to appear in the sidebar
-    "project_nav_name": "PUBGy 1.1.6",
-}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
