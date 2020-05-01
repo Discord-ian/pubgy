@@ -64,7 +64,7 @@ class Pubgy:
         :param player: A player name
         :type player: str
         :param id: A player id (with account)
-        :type: str
+        :type id: str
         :return: A :class:`.objects.Player` with a filled :class:`.objects.Stats` property.
         """
         #TODO: Add support for just sending this function a player id rather than pubgy.Player
@@ -133,9 +133,6 @@ class Pubgy:
 
     @property
     def loop(self):
-        """
-        :returns: The main asyncio loop.
-        """
         return self.aloop
 
     def _checkifbot(self, playernames):

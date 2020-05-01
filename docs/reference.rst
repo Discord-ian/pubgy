@@ -8,5 +8,5 @@ Client
 
 Objects
 --------------------------
-.. automodule:: pubgy.http
+.. automodule:: pubgy.objects
    :members:

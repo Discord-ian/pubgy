@@ -189,6 +189,11 @@ class Query:
         else:
             return await self.parse_resp(resp)
 
+    async def solve_telemetry(self, tel_url):
+        route = Route("telemetry", url = tel_url)
+        resp = await self.request(route)
+        return Telemetry(telemetry=resp)
+
     async def parse_resp(self, resp):
         resp = dict(resp)
         ply_list = []
