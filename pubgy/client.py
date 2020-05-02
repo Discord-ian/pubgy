@@ -18,7 +18,7 @@ class Pubgy:
         """
         :param auth_token: The API Authentication token
         :type auth_token: str
-        :param defaultshard: A Shard from the list of shards in :class`constants.SHARD_LIST`:
+        :param defaultshard: A Shard from the list of shards in :class:`constants.SHARD_LIST`
         :returns: A Pubgy object to do requests from.
         """
         self.auth = auth_token
@@ -36,6 +36,7 @@ class Pubgy:
     async def player(self, plyname, shard=None):
         """
         This function is a coroutine.
+
         Gets a player's stats by using either their player name or account id.
 
         If given a list of player names/ids, they all must be the same type.
@@ -60,7 +61,7 @@ class Pubgy:
 
     async def stats(self, player, id=None):
         """
-
+        This function is a coroutine.
         :param player: A player name
         :type player: str
         :param id: A player id (with account)
@@ -82,6 +83,7 @@ class Pubgy:
     async def samples(self, shard=None, amount=1):
         """
         This function is a coroutine.
+
         Gets sample matches from the /samples endpoint
 
         :type shard: str or None

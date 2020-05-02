@@ -1,16 +1,29 @@
 from pubgy.constants import *
-import json
 
 
 class Match:
-    
+    """
+    A Match object
+    Returned whenever :func:`pubgy.client.matches` is called.
+    """
+
     def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None):
         """
-        :param id: The ID of the Match
+        :param id: The match id
         :type id: str
-        :param partis: A list of Player objects
-        :type partis: List
-        :param shard: A shard object.
+        :param participants:  A list of :class:`objects.Player`
+        :type participants: list
+        :param shard: Which shard did the match occur on
+        :type shard: str
+        :param winners: A list of :class:`objects.Player`
+        :type winners: list
+        :param telemetry: Telemetry URL
+        :type telemetry: str
+        :param map: Which map did the match occur on
+        :type map: str
+        :param matchType: What gamemode type was the match
+        :type matchType: str
+        :returns: A built Match object
         """
         self.matchID = id
         self.participants = participants
@@ -27,29 +40,43 @@ class Match:
     @property
     def id(self):
         """
-        The players ID
         :return: A Match ID (str)
         """
         return self.matchID
 
     @property
     def map(self):
+        """
+        :return: Which map the game occurred on (str)
+        """
         return self._map
 
     @property
     def players(self):
+        """
+        :return: A list of :class:`objects.Player`
+        """
         return self.participants
 
     @property
     def winners(self):
+        """
+        :return: A list of :class:`objects.Player` who won
+        """
         return self.winner
 
     @property
     def shard(self):
+        """
+        :return: The shard the match occurred on (str)
+        """
         return self.shardId
 
     @property
     def telemetry(self):
+        """
+        :return: The telemetry url (str)
+        """
         return self.tel
 
 
@@ -108,6 +135,10 @@ class Telemetry:
         return self.all
 
     def damage_events(self):
+        """
+        Gets all telemetry events in which damage was taken
+        :return: List
+        """
         if self._damageEvents:
             return self._damageEvents
         for item in self.tel:
@@ -133,12 +164,13 @@ class Telemetry:
         return self._attacks
 
     def kills(self):
-        i=1
+        i = 1
         for item in self.tel:
             i = i + 1
             if item.get("attackId") is not None and item.get("killer") is not None:
                 self._kills.append(item)
         return self._kills
+
 
 class Team:
 

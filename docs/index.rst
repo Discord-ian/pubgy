@@ -25,7 +25,6 @@ Building from source (warning: this may be an unstable version of PUBGy, ensure 
 Documentation
 ---------------------------------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    reference
-
