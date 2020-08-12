@@ -1,5 +1,5 @@
 import asyncio
-from pubgy.struct import Filter
+from pubgy.objects import Filter
 
 def newfilter(sort=None, length=None, offset=None, matchid=None, username=None, userid=None):
     if length == None:

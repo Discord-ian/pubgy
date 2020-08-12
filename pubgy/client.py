@@ -74,7 +74,7 @@ class Pubgy:
     async def _generate_telemetry(self, telemetry, match=None):
         """
 
-        :param telemetry:
+        :param telemetr y:
         :type telemetry: str
         :return:
         """
@@ -90,7 +90,7 @@ class Pubgy:
         :param shard: Defaults to shard passed on client initialization
         :type amount: int
         :param amount: Defaults to 1, only returns the amount of match objects equal to length
-        :returns: A populated :class:`.objects.Match` or a list of :class:`.objects.Match` if amount > 1
+        :returns: A list of :class:`.objects.Match`
         """
         return await self.web.sample_info(shard=shard, length=amount)
 
