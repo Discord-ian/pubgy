@@ -26,6 +26,8 @@ class Pubgy:
         self.web = Query(self.aloop, self.auth)
         self.parse = Parser(self.web)
 
+
+    # TODO: Implement method to check if API key is still valid
 #    async def close(self):
 #        """
 #        Closes both the webloop and the asyncio loop. Run before ending your own clients loop.
@@ -68,7 +70,7 @@ class Pubgy:
         :type id: str
         :return: A :class:`.objects.Player` with a filled :class:`.objects.Stats` property.
         """
-        #TODO: Add support for just sending this function a player id rather than pubgy.Player
+        # TODO: Add support for just sending this function a player id rather than pubgy.Player
         return await self.web.get_stats(shard=player.shard, id=player.id, season="all")
 
     async def _generate_telemetry(self, telemetry, match=None):

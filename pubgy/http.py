@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 import weakref
-import time
+import time  # ????
 from .exceptions import *
 import logging
 from .objects import *
@@ -42,7 +42,6 @@ class Query:
         self.loop = loop
         self.shardID = shard
         self.shards = SHARD_LIST
-        #self.sorts = SORTS
         self.headers = {
             "Authorization": auth,
             "Accept": "application/vnd.api+json"
@@ -52,16 +51,20 @@ class Query:
             "Accept": "application/json",
             "Accept-Encoding": "gzip"
         }
-        #self.session = aiohttp.ClientSession(loop=self.loop)
         self.locks = weakref.WeakValueDictionary()
 
     @property
     def shard(self):
         return self.shardID
 
+    @property
+    def isquery(self):
+        return True
+
     def _check_shard(self, shard):
         if shard not in self.shards:
-            #raise InvalidShard("Passed shard of {}, which is invalid.".format(shard))
+            # TODO: ensure all valid shards are implemented before uncommenting
+            raise InvalidShard("Passed shard {}, which is invalid.".format(shard))
             shard = self.shardID
         return shard
 
@@ -95,7 +98,10 @@ class Query:
                         return 429
                     else:
                         errors = await r.json()
-                        log.error("{} | Some other error has occured. {} - {}".format(r.status, errors['errors'][0]['title'], errors['errors'][0].get('detail')))
+                        log.error("{} | Some other error has occurred. {} - {}".format(r.status,
+                                                                                       errors['errors'][0]['title'],
+                                                                                       errors['errors'][0].get('detail')
+                                                                                       ))
                         break
                 if errorc == 2:
                     r = await session.request(method='GET', url=DEBUG_URL)
@@ -108,8 +114,8 @@ class Query:
         shard = self._check_shard(shard)
         route = Route(SAMPLE_ROUTE, shard)
         resp = await self.request(route)
-        list = await self.check_type(resp)
-        return await self.match_info(id=list[:length], shard=shard)
+        _list = await self.check_type(resp)
+        return await self.match_info(id=_list[:length], shard=shard)
 
     async def get_player(self, shard=None, name=None, id=None):
         shard = self._check_shard(shard)
@@ -120,7 +126,8 @@ class Query:
             id_list = []
             #for item in data["relationships"]["matches"]["data"]:
             #    id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
-            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None)# #matchlist=self._find_matches(data))
+            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"],
+                          shard=data["attributes"]["shardId"], uid=None)# #matchlist=self._find_matches(data))
         else:
             if "," in id:
                 route = Route(PLAYERIDLIST, shard, id)
@@ -128,19 +135,22 @@ class Query:
                 data = resp["data"]
                 ply_list = []
                 for player in data:
-                    ply_list.append(Player(name=player["attributes"]["name"], id=player["id"], stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"], uid=None, matchlist=None))
+                    ply_list.append(Player(name=player["attributes"]["name"], id=player["id"],
+                                           stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"],
+                                           uid=None, matchlist=None))
                 return ply_list
             route = Route(PLAYERID_ROUTE, shard, id)
             resp = await self.request(route)
             data = resp["data"]
-            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"], shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
+            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"],
+                          shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
 
     async def match_info(self, shard=None, id=None, sorts=None):
         """
         Gets match info from the API.
         This function is a coroutine.
 
-        :param shard: Shard to get data from. Defaults to Query.shard
+        :param shard: shard to get data from. Defaults to Query.shard
         :param filter: A Filter object to determine what results you want back
         :type filter: a Filter object made with pubgy.utils.filter
         :type id: Match ID. If none is provided, it will return 5 match objects.
@@ -208,13 +218,20 @@ class Query:
                 for_matches[cshard].append(item["attributes"]["stats"]["playerId"])
                 if item["attributes"]["shardId"] not in shardId:
                     shardId.append(item["attributes"]["shardId"])
-                ply_list.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
+                ply_list.append(Player(name=item["attributes"]["stats"]["name"], id=item["id"],
+                                       stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
+                                       uid=item["attributes"]["stats"]["playerId"]))
                 if item["attributes"]["stats"]["winPlace"] == 1:
-                    winners.append(Player(name=item["attributes"]["stats"]["name"],id=item["id"],stats=item["attributes"]["stats"],shard=item["attributes"]["shardId"],uid=item["attributes"]["stats"]["playerId"]))
+                    winners.append(Player(name=item["attributes"]["stats"]["name"], id=item["id"],
+                                          stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
+                                          uid=item["attributes"]["stats"]["playerId"]))
             elif item["type"] == "asset":
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
-        toReturn = Match(participants=ply_list,id=resp["data"]["id"],shard=shardId,winners=winners, telemetry=tel_url, map=resp["data"]["attributes"]["mapName"])
+        toReturn = Match(participants=ply_list, id=resp["data"]["id"], shard=shardId, winners=winners,
+                         telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
+                         matchType=resp["data"]["attributes"]["matchType"],
+                         gameMode=resp["data"]["attributes"]["gameMode"])
         return toReturn
 
     async def _get_player_matches(self, idlist):
@@ -250,7 +267,7 @@ class Query:
         :type filter: A filter object
         :returns: A query param string starting in ? and separated by &
         """
-        if len(keys) == 0:
+        if len(keys) == 0:  # todo: wtf
             return ""
         result = "?"
         if filter.sorts is None:

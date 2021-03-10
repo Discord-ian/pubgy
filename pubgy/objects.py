@@ -7,7 +7,8 @@ class Match:
     Returned whenever :func:`pubgy.client.matches` is called.
     """
 
-    def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None):
+    def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None, gameMode=None):
+        # TODO: matchType != gameMode
         """
         :param id: The match id
         :type id: str
@@ -35,6 +36,7 @@ class Match:
             self.matchType = "Unknown Match Type"
         self.winner = winners
         self._map = TEL_REF[map]
+        self.gameMode = gameMode
         # make a way to make a list of the Player class with everyone who was in the game.
 
     @property
@@ -69,7 +71,7 @@ class Match:
     def shard(self):
         """
         :return: The shard the match occurred on (str)
-        """
+        """  # TODO: this will always be a list (and will have to because of console cross platform play) figure something out.
         return self.shardId
 
     @property
@@ -78,6 +80,14 @@ class Match:
         :return: The telemetry url (str)
         """
         return self.tel
+
+    @property
+    def type(self):
+        return self.matchType
+
+    @property
+    def gamemode(self):
+        return self.gameMode
 
 
 class Player:

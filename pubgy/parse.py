@@ -2,6 +2,7 @@ import json
 from .http import Query, Route
 from .constants import *
 from .objects import Telemetry
+from .exceptions import InvalidObject
 
 
 class Parser:
@@ -11,6 +12,8 @@ class Parser:
         :param queryobj:
         """
         self.query = queryobj
+        if not self.query.isquery:
+            raise InvalidObject
 
     async def telemetry(self, telemetry, match=None):
         url = Route(method="telemetry", url=telemetry)
