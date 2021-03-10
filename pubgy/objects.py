@@ -1,3 +1,25 @@
+"""
+Copyright (c) 2018-2021 Discordian
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
 from pubgy.constants import *
 
 
@@ -34,9 +56,10 @@ class Match:
             self.matchType = matchType
         else:
             self.matchType = "Unknown Match Type"
+            # TODO: Either raise exception of InvalidMatchType or pass through 'Unknown Match Type'
         self.winner = winners
-        self._map = TEL_REF[map]
-        self.gameMode = gameMode
+        self._map = MAP_LIST[map]
+        self.gameMode = GAME_MODES[gameMode]
         # make a way to make a list of the Player class with everyone who was in the game.
 
     @property
