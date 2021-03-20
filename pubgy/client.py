@@ -48,7 +48,6 @@ class Pubgy:
         self.web = Query(self.aloop, self.auth)
         self.parse = Parser(self.web)
 
-
     # TODO: Implement method to check if API key is still valid
 #    async def close(self):
 #        """
@@ -56,6 +55,7 @@ class Pubgy:
 #        """
 #        await self.web.close()
 #        await self.aloop.close()
+
 
     async def player(self, plyname, shard=None):
         """
@@ -160,13 +160,3 @@ class Pubgy:
     @property
     def loop(self):
         return self.aloop
-
-    def _checkifbot(self, playernames):
-        if isinstance(playernames, list):
-            for id in playernames:
-                if "ai." in id:
-                    return True
-        else:
-            if "ai." in playernames:
-                return True
-        return False

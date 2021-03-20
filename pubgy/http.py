@@ -305,6 +305,5 @@ class Query:
             result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &
 
-    # maintain pep8
     async def close(self):
         await self.session.close()
