@@ -10,7 +10,7 @@
 
 *All features currently implemented should work with no issues*
 
-###Todos
+## Todos
 
 - Leaderboards
 - Mastery
