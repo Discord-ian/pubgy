@@ -56,8 +56,7 @@ class Pubgy:
 #        await self.web.close()
 #        await self.aloop.close()
 
-
-    async def player(self, plyname, shard=None):
+    async def get_player(self, plyname, shard=None):
         """
         This function is a coroutine.
 
@@ -104,11 +103,13 @@ class Pubgy:
         """
         return await self.parse.telemetry(telemetry, match=match)
 
-    async def samples(self, shard=None, amount=1):
+    async def get_samples(self, shard=None, amount=1):
         """
         This function is a coroutine.
 
         Gets sample matches from the /samples endpoint
+
+        You can comfortably ignore this if you do not know what it does
 
         :type shard: str or None
         :param shard: Defaults to shard passed on client initialization
@@ -119,6 +120,7 @@ class Pubgy:
         return await self.web.sample_info(shard=shard, length=amount)
 
     async def matches(self, id, shard=None, sorts=None, filter=None):
+        # TODO: change to get_match, add get_matches, get_match only returns object.Match, other returns [object.Match]
         """
         This function is a coroutine.
 
@@ -136,7 +138,7 @@ class Pubgy:
         """
         return await self.web.match_info(id=id, shard=shard, sorts=sorts)
 
-    async def solve(self, telemetry):
+    async def solve(self, telemetry):  # TODO: move into telemetry
         """
         This function is a coroutine.
 

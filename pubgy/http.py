@@ -48,6 +48,8 @@ class Route:
             self.url = url
         elif self._method == "stats":
             self.url = self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
+        elif self._method == "leaderboards":
+            self.url = self.base + self.shard + "/leaderboards/" + "/" + self.id + "/seasons/" + self._url
         else:
             self.url = self.base + self.shard + "/" + self._method + "/" + self.id
 
