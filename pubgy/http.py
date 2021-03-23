@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
 import asyncio
 import aiohttp
+from aiohttp import web
 import weakref
 import time  # ????
 from .exceptions import *
@@ -97,18 +98,18 @@ class Query:
     def _find_matches(self, data):
         id_list = []
         for item in data["relationships"]["matches"]["data"]:
-            id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
+            id_list.append(Match(matchID=item["id"], participants=None, shard=None, winners=None))
         return id_list
 
     async def request(self, route):
-        tool = route.tool
+        tool = route.tool  # debug purposes only, contains information about the request
         url = route.url
         lock = self.locks.get(key=tool)
         if lock is None:
-            lock = asyncio.Lock(loop=self.loop)
+            lock = asyncio.Lock()
             if tool is not None:
                 self.locks[tool] = lock
-        errorc = 0
+        errorc = 0  # error counting to avoid constantly requesting if somethings gone wrong
         async with lock:
             async with aiohttp.ClientSession(loop=self.loop) as session:
                 for tries in range(2):
@@ -119,15 +120,22 @@ class Query:
                         return json.loads(await r.text())
                     elif r.status == 401:
                         raise InvalidAPIKey("Your API key is invalid")
+                    elif r.status == 404:
+                        raise aiohttp.web.HTTPNotFound()  # TODO: error or exception?
                     elif r.status == 429:
-                        log.error("Too many requests.")
-                        return 429
+                        log.error("Too many requests.  Wait before making additional requests")
+                        return 429  # TODO: ratelimit management
                     else:
                         errors = await r.json()
-                        log.error("{} | Some other error has occurred. {} - {}".format(r.status,
-                                                                                       errors['errors'][0]['title'],
-                                                                                       errors['errors'][0].get('detail')
-                                                                                       ))
+                        # TODO: handle_error(errors, tries)
+                        try:
+                            log.error("{} | Some other error has occurred. {} - {}".format(r.status,
+                                                                                           errors['errors'][0]['title'],
+                                                                                           errors['errors'][0].get('detail')
+                                                                                           ))
+                        except KeyError:
+                            log.error("KeyError, please report this as an issue on GitHub and attach the following "
+                                      "info:\nStatus {}\nResp {}\n".format(r.status, errors))
                         break
                 if errorc == 2:
                     r = await session.request(method='GET', url=DEBUG_URL)
@@ -152,7 +160,7 @@ class Query:
             id_list = []
             #for item in data["relationships"]["matches"]["data"]:
             #    id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
-            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"],
+            return Player(name=data["attributes"]["name"], pId=data["id"], stats=data["attributes"]["stats"],
                           shard=data["attributes"]["shardId"], uid=None)# #matchlist=self._find_matches(data))
         else:
             if "," in id:
@@ -161,14 +169,14 @@ class Query:
                 data = resp["data"]
                 ply_list = []
                 for player in data:
-                    ply_list.append(Player(name=player["attributes"]["name"], id=player["id"],
+                    ply_list.append(Player(name=player["attributes"]["name"], pId=player["id"],
                                            stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"],
                                            uid=None, matchlist=None))
                 return ply_list
             route = Route(PLAYERID_ROUTE, shard, id)
             resp = await self.request(route)
             data = resp["data"]
-            return Player(name=data["attributes"]["name"], id=data["id"], stats=data["attributes"]["stats"],
+            return Player(name=data["attributes"]["name"], pId=data["id"], stats=data["attributes"]["stats"],
                           shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
 
     async def match_info(self, shard=None, id=None, sorts=None):
@@ -189,7 +197,6 @@ class Query:
         query_params = {}
         if id is not None and not isinstance(id, list):
             route = Route(path, shard, id=id)
-            print(route.url)
         elif isinstance(id, list):
             log.info("Requesting {} matches...".format(len(id)))
             matches = []
@@ -201,19 +208,18 @@ class Query:
                     resp = await self.request(route)
                     matches.append(await self.check_type(resp))
             return matches
-        #route = Route(path, shard)
+        else:
+            route = Route(path, shard)
         resp = await self.request(route)
         return await self.check_type(resp)
 
     async def check_type(self, resp):
         """
         Checks if data recieved was a sample object, or something else.
-        This function is a coroutine.
         
         :param resp: Response from self.request()
         :type resp: Dict or json
         """
-        match_list = []
         resp = dict(resp)
         tel = ""
         if resp["data"]["type"] == "sample":
@@ -223,38 +229,38 @@ class Query:
                 match_list.append(match["id"])
             return match_list
         else:
-            return await self.parse_resp(resp)
+            return self.parse_resp(resp)
 
     async def solve_telemetry(self, tel_url):
-        route = Route("telemetry", url = tel_url)
+        route = Route("telemetry", url=tel_url)
         resp = await self.request(route)
         return Telemetry(telemetry=resp)
 
-    async def parse_resp(self, resp):
+    def parse_resp(self, resp):
         resp = dict(resp)
         ply_list = []
         winners = []
-        shardId = []
+        shard_id = []
         for_matches = {}
         for item in resp["included"]:
             if item["type"] == "participant":
-                cshard = item["attributes"]["shardId"]
-                if cshard not in for_matches:
-                    for_matches[cshard] = []
-                for_matches[cshard].append(item["attributes"]["stats"]["playerId"])
-                if item["attributes"]["shardId"] not in shardId:
-                    shardId.append(item["attributes"]["shardId"])
-                ply_list.append(Player(name=item["attributes"]["stats"]["name"], id=item["id"],
+                c_shard = item["attributes"]["shardId"]
+                if c_shard not in for_matches:
+                    for_matches[c_shard] = []
+                for_matches[c_shard].append(item["attributes"]["stats"]["playerId"])
+                if item["attributes"]["shardId"] not in shard_id:
+                    shard_id.append(item["attributes"]["shardId"])
+                ply_list.append(Player(name=item["attributes"]["stats"]["name"], pId=item["id"],
                                        stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
                                        uid=item["attributes"]["stats"]["playerId"]))
                 if item["attributes"]["stats"]["winPlace"] == 1:
-                    winners.append(Player(name=item["attributes"]["stats"]["name"], id=item["id"],
+                    winners.append(Player(name=item["attributes"]["stats"]["name"], pId=item["id"],
                                           stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
                                           uid=item["attributes"]["stats"]["playerId"]))
             elif item["type"] == "asset":
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
-        toReturn = Match(participants=ply_list, id=resp["data"]["id"], shard=shardId, winners=winners,
+        toReturn = Match(participants=ply_list, matchID=resp["data"]["id"], shard=shard_id, winners=winners,
                          telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
                          matchType=resp["data"]["attributes"]["matchType"],
                          gameMode=resp["data"]["attributes"]["gameMode"])
@@ -285,7 +291,7 @@ class Query:
         resp = await self.request(url)
         return Stats(resp["data"]["attributes"]["gameModeStats"]["solo"])
 
-    def _generate_query_string(self, filter):
+    def _generate_query_string(self, keys):
         """
         Generates the string to give to Route.
 
@@ -293,7 +299,7 @@ class Query:
         :type filter: A filter object
         :returns: A query param string starting in ? and separated by &
         """
-        if len(keys) == 0:  # todo: wtf
+        if len(keys) == 0:  # todo: what is this
             return ""
         result = "?"
         if filter.sorts is None:
@@ -306,6 +312,3 @@ class Query:
         for k, v in filter.sorts:
             result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &
-
-    async def close(self):
-        await self.session.close()

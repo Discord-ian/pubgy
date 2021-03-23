@@ -29,11 +29,11 @@ class Match:
     Returned whenever :func:`pubgy.client.matches` is called.
     """
 
-    def __init__(self, id, participants, shard, winners, telemetry, map, matchType=None, gameMode=None):
+    def __init__(self, matchID, participants, shard, winners, telemetry, map, matchType=None, gameMode=None):
         # TODO: matchType != gameMode
         """
-        :param id: The match id
-        :type id: str
+        :param matchID: The match id
+        :type matchID: str
         :param participants:  A list of :class:`objects.Player`
         :type participants: list
         :param shard: Which shard did the match occur on
@@ -48,7 +48,7 @@ class Match:
         :type matchType: str
         :returns: A built Match object
         """
-        self.matchID = id
+        self.matchID = matchID
         self.participants = participants
         self.shardId = shard
         self.tel = telemetry
@@ -61,6 +61,9 @@ class Match:
         self._map = MAP_LIST[map]
         self.gameMode = GAME_MODES[gameMode]
         # make a way to make a list of the Player class with everyone who was in the game.
+
+    def __repr__(self):
+        return self.matchID
 
     @property
     def id(self):
@@ -115,12 +118,15 @@ class Match:
 
 class Player:
 
-    def __init__(self, name, id, uid, stats, shard, matchlist=None):
+    def __init__(self, name, pId, uid, stats, shard, matchlist=None):
         self._name = name
         self._uid = uid
-        self._id = id
+        self.pId = pId
         self._shard = shard
         self._matches = matchlist
+
+    def __repr__(self):
+        return self.pId
 
     @property
     def shard(self):
@@ -133,10 +139,6 @@ class Player:
     @property
     def name(self):
         return self._name
-
-    @property
-    def id(self):
-        return self._id
 
     @property
     def matches(self):
@@ -207,9 +209,9 @@ class Telemetry:
 
 class Team:
 
-    def __init__(self, players, id, data):
-        self.players = players
-        self.tId = id
+    def __init__(self, players, tId, data):
+        self._players = players
+        self.tId = tId
         self.json = data
         # add methods to fill in their place, and if they won or not.
 
@@ -219,7 +221,7 @@ class Team:
 
     @property
     def players(self):
-        return self.players
+        return self._players
 
     @property
     def won(self):
@@ -232,11 +234,11 @@ class Team:
 
 class Filter:
 
-    def __init__(self, sort=None, length=None, offset=None, matchid=None, username=None, userid=None):
+    def __init__(self, sort=None, length=None, offset=None, matchId=None, username=None, userid=None):
         # self.sort = sort
         self.length = length
         self.offset = offset
-        self.matchid = matchid
+        self.matchId = matchId
         self.username = username
         self.userid = userid
         self.sorts = {}

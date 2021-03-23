@@ -33,13 +33,16 @@ PLAYERID_ROUTE = "players"
 PLAYERIDLIST = "players?filter[playerIds]="
 SAMPLE_ROUTE = "samples"
 MATCH_TYPES = ["arcade", "custom", "event", "official", "training"]
-MAP_LIST = {"Desert_Main": "Miramar",
-           "DihorOtok_Main": "Vikendi",
-           "Erangel_Main": "Erangel",
-           "Baltic_Main": "Erangel (Remastered)",
-           "Range_Main": "Camp Jackal",
-           "Savage_Main": "Sanhok",
-           "Summerland_Main": "Karakin"}
+MAP_LIST = {
+    "Desert_Main": "Miramar",
+    "DihorOtok_Main": "Vikendi",
+    "Erangel_Main": "Erangel",
+    "Baltic_Main": "Erangel (Remastered)",
+    "Range_Main": "Camp Jackal",
+    "Savage_Main": "Sanhok",
+    "Summerland_Main": "Karakin",
+    "Heaven_Main": "Heaven"
+}
 GAME_MODES = {
     "duo": "Duo TPP",
     "duo-fpp": "Duo FPP",
