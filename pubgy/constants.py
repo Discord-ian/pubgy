@@ -22,12 +22,42 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Some of the contents from this file comes from https://github.com/pubg/api-assets
 """
-SHARD_LIST = ["steam", "kakao", "tournament", "psn", "xbox", "console", "stadia"]
-PLATFORM_REGION = ["pc-as", "pc-eu", "pc-jp", "pc-kakao", "pc-krjp"]
+SHARD_LIST = [
+    "steam",
+    "kakao",
+    "tournament",
+    "psn",
+    "xbox",
+    "console",
+    "stadia"
+]
+PLATFORM_REGION = [
+    "pc-as",
+    "pc-eu",
+    "pc-jp",
+    "pc-kakao",
+    "pc-krjp",
+    "pc-na",
+    "pc-oc",
+    "pc-ru",
+    "pc-sa",
+    "pc-sea",
+    "pc-tournament",
+    "psn-as",
+    "psn-eu",
+    "psn-na",
+    "psn-oc",
+    "xbox-as",
+    "xbox-eu",
+    "xbox-na",
+    "xbox-oc",
+    "xbox-sa"
+]
 DEFAULT_SHARD = SHARD_LIST[0]
 BASE_URL = "https://api.pubg.com/shards/"
 DEBUG_URL = "https://api.pubg.com/status"
 MATCHES_ROUTE = "matches"
+LEADERBOARD_ROUTE = "leaderboards"
 PLAYERNAME_ROUTE = "players?filter[playerNames]="
 PLAYERID_ROUTE = "players"
 PLAYERIDLIST = "players?filter[playerIds]="

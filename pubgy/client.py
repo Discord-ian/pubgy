@@ -138,6 +138,19 @@ class Pubgy:
         """
         return await self.web.match_info(id=id, shard=shard, sorts=sorts)
 
+    async def get_leaderboard(self, platform, season, gamemode):
+        """
+        Gets the leaderboard corresponding to the arguments
+
+        :param platform:
+        :param season:
+        :param gamemode:
+        :return:
+        """
+        #await self.web.test_seasons_leaderboards()
+        return await self.web.leaderboard_info(platform=platform, season=season, gamemode=gamemode)
+
+
     async def solve(self, telemetry):  # TODO: move into telemetry
         """
         This function is a coroutine.

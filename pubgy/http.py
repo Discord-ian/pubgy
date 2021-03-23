@@ -30,17 +30,34 @@ import logging
 from .objects import *
 import json
 from .constants import *
+from .seasons import SEASONS
+
 log = logging.getLogger(__name__)
 
 
 class Route:
     base = BASE_URL
 
-    def __init__(self, method, shard=None, id="", url=None):
+    def __init__(self, method, shard=None, dataId="", url=None, platform=None):
+        """
+        Generate Route object with Route.url and Route.tool
+
+        :param method: The intended endpoint (e.g. 'leaderboards', 'players')
+        :type method: str
+        :param shard: The shard the data is on
+        :type shard: str
+        :param dataId: A unique ID related to the data (e.g. match id, player id)
+        :type dataId: str
+        :param url: Not always used, used when special formatting is not needed
+        :type url: str
+        :param platform: The platform-region the data is on, rarely used (except in leaderboards)
+        :type platform: str
+        """
         self._method = method
         self._url = url
         self.shard = shard
-        self.id = id
+        self.id = dataId
+        self.platform = platform
         if self._method is None:
             self.url = url
         elif "?filter[" in self._method:
@@ -50,7 +67,7 @@ class Route:
         elif self._method == "stats":
             self.url = self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
         elif self._method == "leaderboards":
-            self.url = self.base + self.shard + "/leaderboards/" + "/" + self.id + "/seasons/" + self._url
+            self.url = self.base + self.platform + "/leaderboards/" + self.id + "/" + self._url
         else:
             self.url = self.base + self.shard + "/" + self._method + "/" + self.id
 
@@ -113,7 +130,7 @@ class Query:
         async with lock:
             async with aiohttp.ClientSession(loop=self.loop) as session:
                 for tries in range(2):
-                    r = await session.request(method='GET', url=url, headers=self.headers)
+                    r = await session.request(method='GET', url=url, headers=self.headers_gzip)
                     log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
@@ -131,7 +148,8 @@ class Query:
                         try:
                             log.error("{} | Some other error has occurred. {} - {}".format(r.status,
                                                                                            errors['errors'][0]['title'],
-                                                                                           errors['errors'][0].get('detail')
+                                                                                           errors['errors'][0].get(
+                                                                                               'detail')
                                                                                            ))
                         except KeyError:
                             log.error("KeyError, please report this as an issue on GitHub and attach the following "
@@ -158,10 +176,10 @@ class Query:
             resp = await self.request(route)
             data = resp["data"][0]
             id_list = []
-            #for item in data["relationships"]["matches"]["data"]:
+            # for item in data["relationships"]["matches"]["data"]:
             #    id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
             return Player(name=data["attributes"]["name"], pId=data["id"], stats=data["attributes"]["stats"],
-                          shard=data["attributes"]["shardId"], uid=None)# #matchlist=self._find_matches(data))
+                          shard=data["attributes"]["shardId"], uid=None)  # #matchlist=self._find_matches(data))
         else:
             if "," in id:
                 route = Route(PLAYERIDLIST, shard, id)
@@ -196,7 +214,7 @@ class Query:
         shard = self._check_shard(shard)
         query_params = {}
         if id is not None and not isinstance(id, list):
-            route = Route(path, shard, id=id)
+            route = Route(path, shard, dataId=id)
         elif isinstance(id, list):
             log.info("Requesting {} matches...".format(len(id)))
             matches = []
@@ -204,7 +222,7 @@ class Query:
             for match in id:
                 if i != 50:
                     i += 1
-                    route = Route(path, shard, id=match)
+                    route = Route(path, shard, dataId=match)
                     resp = await self.request(route)
                     matches.append(await self.check_type(resp))
             return matches
@@ -287,9 +305,91 @@ class Query:
 
     async def get_stats(self, id, shard, season):
         shard = self._check_shard(shard)
-        url = Route(url=STATS[season], shard=shard, id=id, method="stats")
+        url = Route(url=STATS[season], shard=shard, dataId=id, method="stats")
         resp = await self.request(url)
         return Stats(resp["data"]["attributes"]["gameModeStats"]["solo"])
+
+    # def parse_leaderboard(self, resp):
+
+    """
+    Leaderboards are treated very weirdly within PUBG due to changes over time with cross-platform play and what not.
+    This is a basic explanation of why I have done what I have done, and some advice if you want to change this code.
+    Below is commented out code that helped me reach this conclusion
+    
+    """
+
+    def _is_platform_shard(self, shard):
+        if shard in PLATFORM_REGION:
+            return True
+        return False
+
+    async def test_seasons_leaderboards(self):  # leaving this here just in case it becomes useful again (hope not)
+        shard_list = SHARD_LIST
+        platform_region_list = ["pc-na", "psn-na", "xbox-na", ]
+        season_list = {"PC": [], "XBOX": [], "PS4": [], "Stadia": []}
+        platform_to_shard = {"PC": ["steam", "pc-na"], "XBOX": ["xbox", "xbox-na"], "PS4": ["psn", "psn-na"]}
+        evaluated = {"PC": {"platform": [], "platform-region": []}, "XBOX": {"platform": [], "platform-region": []},
+                     "PS4": {"platform": [], "platform-region": []}, "Stadia": {"platform": [], "platform-region": []}}
+        for platform_name in SEASONS:  # gets all season ids and puts them in a list for each platform
+            if platform_name == "Stadia":
+                break
+            for season_title in SEASONS[platform_name]:
+                season_list[platform_name].append(season_title["id"])
+        for platform_name in SEASONS:  # pc xbox ps4 stadia
+            for season_id in season_list[platform_name]:  # division.bro.official.2018-02
+                for shard_name in platform_to_shard[platform_name]:  # platform_name = PC/PS4/XBOX
+                    try:
+                        async with aiohttp.ClientSession(headers=self.headers) as session:  # https://api.pugb.com/shards/
+                            url = "{}{}/leaderboards/{}/solo".format(BASE_URL, shard_name, season_id)
+                            logging.debug("Request @ " + url)
+                            r = await session.request(method="GET", url=url)
+                            try:
+                                temp = await r.json()
+                                r_length = len(temp["data"]["relationships"]["players"]["data"])
+                                logging.info("Length: {} -- Status: {}".format(r_length, r.status))
+                            except Exception as e:
+                                logging.error(e)
+                            if r.status == 404:
+                                break
+                            if r_length != 0:
+                                if self._is_platform_shard(shard_name):
+                                    evaluated[platform_name]["platform-region"].append(season_id)
+                                else:
+                                    evaluated[platform_name]["platform"].append(season_id)
+                        await asyncio.sleep(7)  # avoid spamming API
+                    except Exception as e:
+                        logging.error(e)
+        print(evaluated)
+
+    """Output of function above: 
+    {'PC': {'platform': ['division.bro.official.pc-2018-01', 
+    'division.bro.official.pc-2018-02', 'division.bro.official.pc-2018-03', 'division.bro.official.pc-2018-04', 
+    'division.bro.official.pc-2018-05', 'division.bro.official.pc-2018-06', 'division.bro.official.pc-2018-07'], 
+    'platform-region': ['division.bro.official.pc-2018-01', 'division.bro.official.pc-2018-02', 
+    'division.bro.official.pc-2018-03', 'division.bro.official.pc-2018-04', 'division.bro.official.pc-2018-05', 
+    'division.bro.official.pc-2018-06']}, 'XBOX': {'platform': ['division.bro.official.xbox-01', 
+    'division.bro.official.xbox-02', 'division.bro.official.console-03', 'division.bro.official.console-04', 
+    'division.bro.official.console-05', 'division.bro.official.console-06', 'division.bro.official.console-07', 
+    'division.bro.official.console-10'], 'platform-region': ['division.bro.official.xbox-01', 
+    'division.bro.official.xbox-02', 'division.bro.official.console-03', 'division.bro.official.console-04', 
+    'division.bro.official.console-05', 'division.bro.official.console-06', 'division.bro.official.console-09', 
+    'division.bro.official.console-10']}, 'PS4': {'platform': ['division.bro.official.2018-09', 
+    'division.bro.official.playstation-01', 'division.bro.official.playstation-02', 
+    'division.bro.official.console-03', 'division.bro.official.console-04', 'division.bro.official.console-05', 
+    'division.bro.official.console-06', 'division.bro.official.console-07', 'division.bro.official.console-10'], 
+    'platform-region': ['division.bro.official.playstation-01', 'division.bro.official.playstation-02', 
+    'division.bro.official.console-03', 'division.bro.official.console-04', 'division.bro.official.console-05', 
+    'division.bro.official.console-06', 'division.bro.official.console-09', 'division.bro.official.console-10']}, 
+    'Stadia': {'platform': [], 'platform-region': []}} 
+    """
+
+    async def leaderboard_info(self, platform, season, gamemode):
+        # platform = self._check_platform(platform)
+        url = Route(url=gamemode, dataId=season, method=LEADERBOARD_ROUTE, platform=platform)
+        resp = await self.request(url)
+        with open("../debug/leaderboardresp.json", "w+") as out:
+            json.dump(resp, out)
+        # return parse_leaderboard(resp)
 
     def _generate_query_string(self, keys):
         """
@@ -310,5 +410,5 @@ class Query:
                 result = "{}page[offset]={}&".format(result, filter.offset)
             # need to add more filters to distinguish between players, etc
         for k, v in filter.sorts:
-            result = "{}{}={}&".format(result, k, v) # append to the current result a key value pair
+            result = "{}{}={}&".format(result, k, v)  # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &
