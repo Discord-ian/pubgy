@@ -24,7 +24,6 @@ import asyncio
 from .http import Query
 from .parse import Parser
 from .exceptions import InvalidPlayerID
-from .objects import Player
 
 
 class Pubgy:

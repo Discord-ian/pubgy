@@ -20,10 +20,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
-import json
 from .http import Query, Route
-from .constants import *
-from .objects import Telemetry
+from .objects.telemetry import Telemetry
 from .exceptions import InvalidObject
 
 

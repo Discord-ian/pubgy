@@ -27,7 +27,10 @@ import weakref
 import time  # ????
 from .exceptions import *
 import logging
-from .objects import *
+from .objects.player import Player
+from .objects.match import Match
+from .objects.telemetry import Telemetry
+from .objects.stats import Stats
 import json
 from .constants import *
 from .seasons import SEASONS
