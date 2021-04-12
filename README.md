@@ -13,12 +13,12 @@
 ## Todos
 
 - Leaderboards
+- Parsing telemetry
 - Mastery
 - Season/Lifetime Stats
-- Parsing telemetry
 - Tournaments
 
-Items are listed in order of priority
+**Items are listed in order of priority**
 ## Installation
 Install / Update via pip
 ```
@@ -26,12 +26,12 @@ pip install -U pubgy
 ```
 Building from source
 ```
-git clone https://github.com/Discord-ian/pubgy.git
+git clone https://github.com/Discord-ian/pubgy.git --branch rewrite
 cd pubgy
 python setup.py install
 ```
 ## Documentation (WIP)
 
-https://pubgy.readthedocs.io
+https://pubgy.readthedocs.io/en/rewrite/
 
 ## Contributing

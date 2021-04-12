@@ -1,6 +1,3 @@
-import json
-
-
 def generate_telemetry(tel_data):
     dataToReturn = {"data": {}}
     for item in tel_data:
@@ -8,7 +5,3 @@ def generate_telemetry(tel_data):
             dataToReturn["data"][item["_T"]] = []
         dataToReturn["data"][item["_T"]].append(item)
     return dataToReturn
-
-
-
-

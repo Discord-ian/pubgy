@@ -1,13 +1,9 @@
 from setuptools import setup, find_packages
-#from pubgy import __version__ as v
-#try:
-#    with open("README.md") as info:
-#        desc = info.read()
-#except FileNotFoundError:
-#desc = "Python wrapper for the PUBG API"
+from pubgy import __version__ as v
+
 setup(
     name='PUBGy',
-    version="2.0.0a",
+    version=v,
     description="PUBG API wrapper for Python",
     long_description="Python wrapper for the PUBG API",
     long_description_content_type="text/markdown",
