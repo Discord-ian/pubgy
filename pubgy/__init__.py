@@ -5,6 +5,7 @@ __version__ = "2.0.0-alpha"  # https://semver.org/
 
 
 from .client import *
-from .http import Query
+from .http import *
 from .objects import *
 from .constants import *
+from .telemetry import *

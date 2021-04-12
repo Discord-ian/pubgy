@@ -6,7 +6,7 @@
 
 **Python Wrapper for interacting with the PUBG API**
 
-*Not fully functional, but working with V20.3.0*
+*Not fully functional, but working with V20.4.0*
 
 *All features currently implemented should work with no issues*
 

@@ -25,15 +25,17 @@ import aiohttp
 from aiohttp import web
 import weakref
 import time  # ????
-from .exceptions import *
+import json
 import logging
+import warnings
+from .exceptions import *
 from .objects.player import Player
 from .objects.match import Match
 from .objects.telemetry import Telemetry
 from .objects.stats import Stats
-import json
 from .constants import *
 from .seasons import SEASONS
+
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +73,8 @@ class Route:
             self.url = self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
         elif self._method == "leaderboards":
             self.url = self.base + self.platform + "/leaderboards/" + self.id + "/" + self._url
+        elif self._method == "test":
+            self.url = self._url
         else:
             self.url = self.base + self.shard + "/" + self._method + "/" + self.id
 
@@ -86,7 +90,7 @@ class Route:
 class Query:
 
     def __init__(self, loop, auth, shard=DEFAULT_SHARD):
-        self.loop = loop
+        self.loop = asyncio.get_event_loop()
         self.shardID = shard
         self.shards = SHARD_LIST
         self.headers = {
@@ -111,7 +115,7 @@ class Query:
     def _check_shard(self, shard):
         if shard not in self.shards:
             # TODO: ensure all valid shards are implemented before uncommenting
-            raise InvalidShard("Passed shard {}, which is invalid.".format(shard))
+            warnings.warn("Passed shard {}, which is invalid.".format(shard), InvalidShard)
             shard = self.shardID
         return shard
 
@@ -121,9 +125,11 @@ class Query:
             id_list.append(Match(matchID=item["id"], participants=None, shard=None, winners=None))
         return id_list
 
-    async def request(self, route):
+    async def request(self, route, headers=None):
         tool = route.tool  # debug purposes only, contains information about the request
         url = route.url
+        if headers is None:
+            headers = self.headers_gzip  # add gzip disable just in case
         lock = self.locks.get(key=tool)
         if lock is None:
             lock = asyncio.Lock()
@@ -133,7 +139,7 @@ class Query:
         async with lock:
             async with aiohttp.ClientSession(loop=self.loop) as session:
                 for tries in range(2):
-                    r = await session.request(method='GET', url=url, headers=self.headers_gzip)
+                    r = await session.request(method='GET', url=url, headers=headers)
                     log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
@@ -281,11 +287,10 @@ class Query:
             elif item["type"] == "asset":
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
-        toReturn = Match(participants=ply_list, matchID=resp["data"]["id"], shard=shard_id, winners=winners,
-                         telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
-                         matchType=resp["data"]["attributes"]["matchType"],
-                         gameMode=resp["data"]["attributes"]["gameMode"])
-        return toReturn
+        return Match(participants=ply_list, matchID=resp["data"]["id"], shard=shard_id, winners=winners,
+              telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
+              matchType=resp["data"]["attributes"]["matchType"],
+              gameMode=resp["data"]["attributes"]["gameMode"])
 
     async def _get_player_matches(self, idlist):
         finallist = []

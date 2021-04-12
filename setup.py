@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 #desc = "Python wrapper for the PUBG API"
 setup(
     name='PUBGy',
-    version="1.1.6",
+    version="2.0.0a",
     description="PUBG API wrapper for Python",
     long_description="Python wrapper for the PUBG API",
     long_description_content_type="text/markdown",

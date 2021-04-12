@@ -71,7 +71,8 @@ MAP_LIST = {
     "Range_Main": "Camp Jackal",
     "Savage_Main": "Sanhok",
     "Summerland_Main": "Karakin",
-    "Heaven_Main": "Heaven"
+    "Heaven_Main": "Heaven",
+    "Chimera_Main": "Chimera"
 }
 GAME_MODES = {
     "duo": "Duo TPP",

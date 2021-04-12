@@ -85,7 +85,7 @@ class Pubgy:
         """
         This function is a coroutine.
         :param player: A player name
-        :type player: str
+        :type player: :class:`.objects.Player`
         :param id: A player id (with account)
         :type id: str
         :return: A :class:`.objects.Player` with a filled :class:`.objects.Stats` property.
@@ -96,7 +96,7 @@ class Pubgy:
     async def _generate_telemetry(self, telemetry, match=None):
         """
 
-        :param telemetr y:
+        :param telemetry:
         :type telemetry: str
         :return:
         """
@@ -148,7 +148,6 @@ class Pubgy:
         """
         #await self.web.test_seasons_leaderboards()
         return await self.web.leaderboard_info(platform=platform, season=season, gamemode=gamemode)
-
 
     async def solve(self, telemetry):  # TODO: move into telemetry
         """

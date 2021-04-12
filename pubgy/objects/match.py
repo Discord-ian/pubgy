@@ -75,7 +75,7 @@ class Match:
     def shard(self):
         """
         :return: The shard the match occurred on (str)
-        """  # TODO: this will always be a list (and will have to because of console cross platform play) figure something out.
+        """  # TODO: this will always be a list (and will have to because of console cross platform play)
         return self.shardId
 
     @property
