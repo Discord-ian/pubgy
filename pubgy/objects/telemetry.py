@@ -1,60 +1,58 @@
-class Telemetry:
+import time
 
-    def __init__(self, telemetry, url=None, match=None):
+
+class Telemetry:
+    # would love to use a dataclass, but need to remain backwards compat with 3.5 (for now)
+    # todo: add method to match requests to enable automatic retrieval of telemetry data
+    def __init__(self, url, data=None):
+        """
+
+        :param url:
+        :param data:
+        """
         self._url = url
-        self.tel = telemetry
-        self._match = match
-        self._damageEvents = []
-        self._movements = []
-        self.all = []
-        self._attacks = []
-        self._kills = []
+        self._data = data
+        self._events = []
+
+    def calculate_events(self):
+        """
+
+        :return:
+        """
+        for item in self._data["data"]:
+            if self._data["events"].get(item["_T"]) is None:
+                self._data["events"][item["_T"]] = []
+            self._data["events"][item["_T"]].append(item)
+        return self._data["events"]
 
     @property
     def url(self):
         return self._url
 
-    @property
-    def match(self):
-        return self._match
+    def set_data(self, data):
+        self._data = {"events": {}, "data": data, "sorted": False}
 
     @property
-    def full(self):
-        return self.all
-
-    def damage_events(self):
+    def events(self):
         """
-        Gets all telemetry events in which damage was taken
-        :return: List
+
+        :return:
         """
-        if self._damageEvents:
-            return self._damageEvents
-        for item in self.tel:
-            self.all.append(item)
-            if item["_T"] == "LogPlayerTakeDamage":
-                self._damageEvents.append(item)  # {"cause": })
-        return self._damageEvents
+        return self._check_if_exist("events")
 
-    def movements(self):
-        if self._movements:
-            return self._movements
-        for item in self.tel:
-            if item["_T"] == "LogPlayerPosition":
-                self._movements.append({"time": item["_D"], "name": item["character"]["name"],
-                                        "position": {"x": item["character"]["location"]["x"],
-                                                     "y": item["character"]["location"]["y"]}})
-        return self._movements
 
-    def attacks(self):
-        for item in self.tel:
-            if item.get("attackId") is not None:
-                self._attacks.append(item)
-        return self._attacks
+    def _check_if_exist(self, info):
+        """
 
-    def kills(self):
-        i = 1
-        for item in self.tel:
-            i = i + 1
-            if item.get("attackId") is not None and item.get("killer") is not None:
-                self._kills.append(item)
-        return self._kills
+        :return:
+        """
+        if info.lower() == "events":
+            if self._data.get(info) is {}:
+                return self._data[info]
+            else:
+                return self.calculate_events()
+        if self._data["sorted"]:
+            return self._data[info]
+        elif self._data["sorted"] is False:
+            self.calculate_events()
+

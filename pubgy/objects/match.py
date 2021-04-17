@@ -1,4 +1,5 @@
 from pubgy.constants import MATCH_TYPES, MAP_LIST, GAME_MODES
+from pubgy.objects.telemetry import Telemetry
 
 
 class Match:
@@ -15,7 +16,7 @@ class Match:
         :param participants:  A list of :class:`objects.Player`
         :type participants: list
         :param shard: Which shard did the match occur on
-        :type shard: str
+        :type shard: list
         :param winners: A list of :class:`objects.Player`
         :type winners: list
         :param telemetry: Telemetry URL
@@ -29,7 +30,7 @@ class Match:
         self.matchID = matchID
         self.participants = participants
         self.shardId = shard
-        self.tel = telemetry
+        self.tel = Telemetry(url=telemetry)
         if matchType in MATCH_TYPES:
             self.matchType = matchType
         else:

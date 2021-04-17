@@ -261,7 +261,7 @@ class Query:
     async def solve_telemetry(self, tel_url):
         route = Route("telemetry", url=tel_url)
         resp = await self.request(route)
-        return Telemetry(telemetry=resp)
+        return resp
 
     def parse_resp(self, resp):
         resp = dict(resp)
@@ -269,6 +269,7 @@ class Query:
         winners = []
         shard_id = []
         for_matches = {}
+        tel_url = ""
         for item in resp["included"]:
             if item["type"] == "participant":
                 c_shard = item["attributes"]["shardId"]
@@ -288,9 +289,9 @@ class Query:
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
         return Match(participants=ply_list, matchID=resp["data"]["id"], shard=shard_id, winners=winners,
-              telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
-              matchType=resp["data"]["attributes"]["matchType"],
-              gameMode=resp["data"]["attributes"]["gameMode"])
+                     telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
+                     matchType=resp["data"]["attributes"]["matchType"],
+                     gameMode=resp["data"]["attributes"]["gameMode"])
 
     async def _get_player_matches(self, idlist):
         finallist = []
