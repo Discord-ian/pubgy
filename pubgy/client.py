@@ -44,7 +44,11 @@ class Pubgy:
         """
         self.auth = auth_token
         self.aloop = asyncio.get_event_loop()
-        self.web = Query(self.aloop, self.auth)
+        if defaultshard is None:
+            self.web = Query(self.aloop, self.auth)
+        else:
+            # fixes issue where cli.shard DOES NOT reflect shard passed at creation
+            self.web = Query(self.aloop, self.auth, shard=defaultshard)
         self.parse = Parser(self.web)
 
     # TODO: Implement method to check if API key is still valid
@@ -67,9 +71,7 @@ class Pubgy:
         :type plyname: str or list
         :return: :class:`.objects.Player`
         """
-        # check if plyname is actually a bot
-        if self._checkifbot(plyname):
-            return InvalidPlayerID
+        # TODO: might need to check to see if user is a bot first
         if isinstance(plyname, list):
             if plyname[0][:8] == "account.":
                 return await self.web.get_player(id=plyname, shard=shard)

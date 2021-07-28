@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'PUBGy'
-copyright = '2020, Discordian'
+copyright = '2021, Discordian'
 author = 'Discordian'
 
 # The full version, including alpha/beta/rc tags
