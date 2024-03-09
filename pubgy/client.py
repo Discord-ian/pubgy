@@ -49,9 +49,8 @@ class Pubgy:
         if defaultshard is None:
             self.web = Query(self.aloop, self.auth)
         else:
+            # fixes issue where cli.shard DOES NOT reflect shard passed at creation
             self.web = Query(self.aloop, self.auth, shard=defaultshard)
-        # no instance of self.shard for two reasons: it would interfere with client.shard having no setter,
-        # and since the shard is passed along to Pubgy.Query, we can just ask it what shard it has
         self.parse = Parser(self.web)
 
     # TODO: Implement method to check if API key is still valid
