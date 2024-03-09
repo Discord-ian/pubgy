@@ -20,6 +20,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 import asyncio
 from .http import Query
 from .parse import Parser
@@ -35,6 +36,7 @@ class Pubgy:
         client = pubgy.Pubgy("your auth token")
 
     """
+
     def __init__(self, auth_token, defaultshard=None):
         """
         :param auth_token: The API Authentication token
@@ -44,16 +46,21 @@ class Pubgy:
         """
         self.auth = auth_token
         self.aloop = asyncio.get_event_loop()
-        self.web = Query(self.aloop, self.auth)
+        if defaultshard is None:
+            self.web = Query(self.aloop, self.auth)
+        else:
+            self.web = Query(self.aloop, self.auth, shard=defaultshard)
+        # no instance of self.shard for two reasons: it would interfere with client.shard having no setter,
+        # and since the shard is passed along to Pubgy.Query, we can just ask it what shard it has
         self.parse = Parser(self.web)
 
     # TODO: Implement method to check if API key is still valid
-#    async def close(self):
-#        """
-#        Closes both the webloop and the asyncio loop. Run before ending your own clients loop.
-#        """
-#        await self.web.close()
-#        await self.aloop.close()
+    #    async def close(self):
+    #        """
+    #        Closes both the webloop and the asyncio loop. Run before ending your own clients loop.
+    #        """
+    #        await self.web.close()
+    #        await self.aloop.close()
 
     async def get_player(self, plyname, shard=None):
         """
@@ -62,14 +69,11 @@ class Pubgy:
         Gets a player's stats by using either their player name or account id.
 
         If given a list of player names/ids, they all must be the same type.
-        
+
         :param plyname: A Players name/ID
         :type plyname: str or list
         :return: :class:`.objects.Player`
         """
-        # check if plyname is actually a bot
-        if self._checkifbot(plyname):
-            return InvalidPlayerID
         if isinstance(plyname, list):
             if plyname[0][:8] == "account.":
                 return await self.web.get_player(id=plyname, shard=shard)
@@ -137,17 +141,16 @@ class Pubgy:
         """
         return await self.web.match_info(id=id, shard=shard, sorts=sorts)
 
-    async def get_leaderboard(self, platform, season, gamemode):
-        """
-        Gets the leaderboard corresponding to the arguments
-
-        :param platform:
-        :param season:
-        :param gamemode:
-        :return:
-        """
-        #await self.web.test_seasons_leaderboards()
-        return await self.web.leaderboard_info(platform=platform, season=season, gamemode=gamemode)
+    # async def get_leaderboard(self, platform, season, gamemode):
+    #    """
+    #    Gets the leaderboard corresponding to the arguments
+    #
+    #    :param platform:
+    #    :param season:
+    #    :param gamemode:
+    #    :return:
+    #    """
+    #    return await self.web.leaderboard_info(platform=platform, season=season, gamemode=gamemode)
 
     async def solve(self, telemetry):  # TODO: move into telemetry
         """
@@ -166,7 +169,7 @@ class Pubgy:
         Returns the shard the client was initiated with. This is used as the default shard for all commands,
         unless another one is passed
 
-        :returns: str 
+        :returns: str
         """
         return self.web.shard
 

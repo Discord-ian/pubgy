@@ -20,6 +20,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 """
+
 import asyncio
 import aiohttp
 from aiohttp import web
@@ -70,9 +71,13 @@ class Route:
         elif self._method == "telemetry":
             self.url = url
         elif self._method == "stats":
-            self.url = self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
+            self.url = (
+                self.base + self.shard + "/players/" + self.id + "/seasons/" + self._url
+            )
         elif self._method == "leaderboards":
-            self.url = self.base + self.platform + "/leaderboards/" + self.id + "/" + self._url
+            self.url = (
+                self.base + self.platform + "/leaderboards/" + self.id + "/" + self._url
+            )
         elif self._method == "test":
             self.url = self._url
         else:
@@ -80,7 +85,7 @@ class Route:
 
     @property
     def tool(self):
-        return '{0.shard}:{0.method}:{0.id}: {0.url}'.format(self)
+        return "{0.shard}:{0.method}:{0.id}: {0.url}".format(self)
 
     @property
     def method(self):
@@ -93,14 +98,11 @@ class Query:
         self.loop = asyncio.get_event_loop()
         self.shardID = shard
         self.shards = SHARD_LIST
-        self.headers = {
-            "Authorization": auth,
-            "Accept": "application/vnd.api+json"
-        }
+        self.headers = {"Authorization": auth, "Accept": "application/vnd.api+json"}
         self.headers_gzip = {
             "Authorization": auth,
             "Accept": "application/json",
-            "Accept-Encoding": "gzip"
+            "Accept-Encoding": "gzip",
         }
         self.locks = weakref.WeakValueDictionary()
 
@@ -113,16 +115,34 @@ class Query:
         return True
 
     def _check_shard(self, shard):
+        if isinstance(shard, list) and len(shard) > 1:
+            shardList = []
+            for item in shard:
+                if item not in self.shards:
+                    warnings.warn(
+                        "Passed shard {}, which is invalid.".format(shard), InvalidShard
+                    )
+                    shard = self.shardID
+                else:
+                    shardList.append(shard)
+        elif isinstance(shard, list):
+            shard = shard[0]
+        if shard is None:
+            shard = self.shardID
         if shard not in self.shards:
             # TODO: ensure all valid shards are implemented before uncommenting
-            warnings.warn("Passed shard {}, which is invalid.".format(shard), InvalidShard)
+            warnings.warn(
+                "Passed shard {}, which is invalid.".format(shard), InvalidShard
+            )
             shard = self.shardID
         return shard
 
     def _find_matches(self, data):
         id_list = []
         for item in data["relationships"]["matches"]["data"]:
-            id_list.append(Match(matchID=item["id"], participants=None, shard=None, winners=None))
+            id_list.append(
+                Match(matchID=item["id"], participants=None, shard=None, winners=None)
+            )
         return id_list
 
     async def request(self, route, headers=None):
@@ -135,11 +155,13 @@ class Query:
             lock = asyncio.Lock()
             if tool is not None:
                 self.locks[tool] = lock
-        errorc = 0  # error counting to avoid constantly requesting if somethings gone wrong
+        errorc = (
+            0  # error counting to avoid constantly requesting if somethings gone wrong
+        )
         async with lock:
             async with aiohttp.ClientSession(loop=self.loop) as session:
                 for tries in range(2):
-                    r = await session.request(method='GET', url=url, headers=headers)
+                    r = await session.request(method="GET", url=url, headers=headers)
                     log.debug(msg="Requesting {}".format(tool))
                     if r.status == 200:
                         log.debug(msg="Request {} returned: 200".format(tool))
@@ -149,23 +171,29 @@ class Query:
                     elif r.status == 404:
                         raise aiohttp.web.HTTPNotFound()  # TODO: error or exception?
                     elif r.status == 429:
-                        log.error("Too many requests.  Wait before making additional requests")
+                        log.error(
+                            "Too many requests.  Wait before making additional requests"
+                        )
                         return 429  # TODO: ratelimit management
                     else:
                         errors = await r.json()
                         # TODO: handle_error(errors, tries)
                         try:
-                            log.error("{} | Some other error has occurred. {} - {}".format(r.status,
-                                                                                           errors['errors'][0]['title'],
-                                                                                           errors['errors'][0].get(
-                                                                                               'detail')
-                                                                                           ))
+                            log.error(
+                                "{} | Some other error has occurred. {} - {}".format(
+                                    r.status,
+                                    errors["errors"][0]["title"],
+                                    errors["errors"][0].get("detail"),
+                                )
+                            )
                         except KeyError:
-                            log.error("KeyError, please report this as an issue on GitHub and attach the following "
-                                      "info:\nStatus {}\nResp {}\n".format(r.status, errors))
+                            log.error(
+                                "KeyError, please report this as an issue on GitHub and attach the following "
+                                "info:\nStatus {}\nResp {}\n".format(r.status, errors)
+                            )
                         break
                 if errorc == 2:
-                    r = await session.request(method='GET', url=DEBUG_URL)
+                    r = await session.request(method="GET", url=DEBUG_URL)
                     if r.status != 200:
                         log.error("The API is down or unreachable.")
                 await session.close()
@@ -182,13 +210,22 @@ class Query:
         shard = self._check_shard(shard)
         if name is not None:
             route = Route(PLAYERNAME_ROUTE, shard, name)
-            resp = await self.request(route)
+            try:
+                resp = await self.request(route)
+            except aiohttp.web.HTTPNotFound:
+                logging.warning("Invalid Player Name")
+                return None
             data = resp["data"][0]
             id_list = []
             # for item in data["relationships"]["matches"]["data"]:
             #    id_list.append(Match(id=item["id"], participants=None, shard=None, winners=None))
-            return Player(name=data["attributes"]["name"], pId=data["id"], stats=data["attributes"]["stats"],
-                          shard=data["attributes"]["shardId"], uid=None)  # #matchlist=self._find_matches(data))
+            return Player(
+                name=data["attributes"]["name"],
+                pId=data["id"],
+                stats=data["attributes"]["stats"],
+                shard=data["attributes"]["shardId"],
+                uid=None,
+            )  # #matchlist=self._find_matches(data))
         else:
             if "," in id:
                 route = Route(PLAYERIDLIST, shard, id)
@@ -196,15 +233,28 @@ class Query:
                 data = resp["data"]
                 ply_list = []
                 for player in data:
-                    ply_list.append(Player(name=player["attributes"]["name"], pId=player["id"],
-                                           stats=player["attributes"]["stats"], shard=player["attributes"]["shardId"],
-                                           uid=None, matchlist=None))
+                    ply_list.append(
+                        Player(
+                            name=player["attributes"]["name"],
+                            pId=player["id"],
+                            stats=player["attributes"]["stats"],
+                            shard=player["attributes"]["shardId"],
+                            uid=None,
+                            matchlist=None,
+                        )
+                    )
                 return ply_list
             route = Route(PLAYERID_ROUTE, shard, id)
             resp = await self.request(route)
             data = resp["data"]
-            return Player(name=data["attributes"]["name"], pId=data["id"], stats=data["attributes"]["stats"],
-                          shard=data["attributes"]["shardId"], uid=None, matchlist=self._find_matches(data))
+            return Player(
+                name=data["attributes"]["name"],
+                pId=data["id"],
+                stats=data["attributes"]["stats"],
+                shard=data["attributes"]["shardId"],
+                uid=None,
+                matchlist=self._find_matches(data),
+            )
 
     async def match_info(self, shard=None, id=None, sorts=None):
         """
@@ -243,7 +293,7 @@ class Query:
     async def check_type(self, resp):
         """
         Checks if data recieved was a sample object, or something else.
-        
+
         :param resp: Response from self.request()
         :type resp: Dict or json
         """
@@ -259,7 +309,7 @@ class Query:
             return self.parse_resp(resp)
 
     async def solve_telemetry(self, tel_url):
-        route = Route("telemetry", url=tel_url)
+        route = Route(method="telemetry", url=tel_url)
         resp = await self.request(route)
         return resp
 
@@ -278,20 +328,38 @@ class Query:
                 for_matches[c_shard].append(item["attributes"]["stats"]["playerId"])
                 if item["attributes"]["shardId"] not in shard_id:
                     shard_id.append(item["attributes"]["shardId"])
-                ply_list.append(Player(name=item["attributes"]["stats"]["name"], pId=item["id"],
-                                       stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
-                                       uid=item["attributes"]["stats"]["playerId"]))
+                ply_list.append(
+                    Player(
+                        name=item["attributes"]["stats"]["name"],
+                        pId=item["id"],
+                        stats=item["attributes"]["stats"],
+                        shard=item["attributes"]["shardId"],
+                        uid=item["attributes"]["stats"]["playerId"],
+                    )
+                )
                 if item["attributes"]["stats"]["winPlace"] == 1:
-                    winners.append(Player(name=item["attributes"]["stats"]["name"], pId=item["id"],
-                                          stats=item["attributes"]["stats"], shard=item["attributes"]["shardId"],
-                                          uid=item["attributes"]["stats"]["playerId"]))
+                    winners.append(
+                        Player(
+                            name=item["attributes"]["stats"]["name"],
+                            pId=item["id"],
+                            stats=item["attributes"]["stats"],
+                            shard=item["attributes"]["shardId"],
+                            uid=item["attributes"]["stats"]["playerId"],
+                        )
+                    )
             elif item["type"] == "asset":
                 if item["attributes"]["name"] == "telemetry":
                     tel_url = item["attributes"]["URL"]
-        return Match(participants=ply_list, matchID=resp["data"]["id"], shard=shard_id, winners=winners,
-                     telemetry=tel_url, map=resp["data"]["attributes"]["mapName"],
-                     matchType=resp["data"]["attributes"]["matchType"],
-                     gameMode=resp["data"]["attributes"]["gameMode"])
+        return Match(
+            participants=ply_list,
+            matchID=resp["data"]["id"],
+            shard=shard_id,
+            winners=winners,
+            telemetry=tel_url,
+            map=resp["data"]["attributes"]["mapName"],
+            matchType=resp["data"]["attributes"]["matchType"],
+            gameMode=resp["data"]["attributes"]["gameMode"],
+        )
 
     async def _get_player_matches(self, idlist):
         finallist = []
@@ -307,7 +375,7 @@ class Query:
             for request in tosend[shard]:
                 formatted = ""
                 for item in request:
-                    formatted += (item + ",")
+                    formatted += item + ","
                 resp = await self.get_player(id=formatted[:-1], shard=shard)
                 finallist.append(resp)
         return finallist
@@ -332,39 +400,73 @@ class Query:
             return True
         return False
 
-    async def test_seasons_leaderboards(self):  # leaving this here just in case it becomes useful again (hope not)
+    async def test_seasons_leaderboards(
+        self,
+    ):  # leaving this here just in case it becomes useful again (hope not)
         shard_list = SHARD_LIST
-        platform_region_list = ["pc-na", "psn-na", "xbox-na", ]
+        platform_region_list = [
+            "pc-na",
+            "psn-na",
+            "xbox-na",
+        ]
         season_list = {"PC": [], "XBOX": [], "PS4": [], "Stadia": []}
-        platform_to_shard = {"PC": ["steam", "pc-na"], "XBOX": ["xbox", "xbox-na"], "PS4": ["psn", "psn-na"]}
-        evaluated = {"PC": {"platform": [], "platform-region": []}, "XBOX": {"platform": [], "platform-region": []},
-                     "PS4": {"platform": [], "platform-region": []}, "Stadia": {"platform": [], "platform-region": []}}
-        for platform_name in SEASONS:  # gets all season ids and puts them in a list for each platform
+        platform_to_shard = {
+            "PC": ["steam", "pc-na"],
+            "XBOX": ["xbox", "xbox-na"],
+            "PS4": ["psn", "psn-na"],
+        }
+        evaluated = {
+            "PC": {"platform": [], "platform-region": []},
+            "XBOX": {"platform": [], "platform-region": []},
+            "PS4": {"platform": [], "platform-region": []},
+            "Stadia": {"platform": [], "platform-region": []},
+        }
+        for (
+            platform_name
+        ) in SEASONS:  # gets all season ids and puts them in a list for each platform
             if platform_name == "Stadia":
                 break
             for season_title in SEASONS[platform_name]:
                 season_list[platform_name].append(season_title["id"])
         for platform_name in SEASONS:  # pc xbox ps4 stadia
-            for season_id in season_list[platform_name]:  # division.bro.official.2018-02
-                for shard_name in platform_to_shard[platform_name]:  # platform_name = PC/PS4/XBOX
+            for season_id in season_list[
+                platform_name
+            ]:  # division.bro.official.2018-02
+                for shard_name in platform_to_shard[
+                    platform_name
+                ]:  # platform_name = PC/PS4/XBOX
                     try:
-                        async with aiohttp.ClientSession(headers=self.headers) as session:  # https://api.pugb.com/shards/
-                            url = "{}{}/leaderboards/{}/solo".format(BASE_URL, shard_name, season_id)
+                        async with aiohttp.ClientSession(
+                            headers=self.headers
+                        ) as session:  # https://api.pugb.com/shards/
+                            url = "{}{}/leaderboards/{}/solo".format(
+                                BASE_URL, shard_name, season_id
+                            )
                             logging.debug("Request @ " + url)
                             r = await session.request(method="GET", url=url)
                             try:
                                 temp = await r.json()
-                                r_length = len(temp["data"]["relationships"]["players"]["data"])
-                                logging.info("Length: {} -- Status: {}".format(r_length, r.status))
+                                r_length = len(
+                                    temp["data"]["relationships"]["players"]["data"]
+                                )
+                                logging.info(
+                                    "Length: {} -- Status: {}".format(
+                                        r_length, r.status
+                                    )
+                                )
                             except Exception as e:
                                 logging.error(e)
                             if r.status == 404:
                                 break
                             if r_length != 0:
                                 if self._is_platform_shard(shard_name):
-                                    evaluated[platform_name]["platform-region"].append(season_id)
+                                    evaluated[platform_name]["platform-region"].append(
+                                        season_id
+                                    )
                                 else:
-                                    evaluated[platform_name]["platform"].append(season_id)
+                                    evaluated[platform_name]["platform"].append(
+                                        season_id
+                                    )
                         await asyncio.sleep(7)  # avoid spamming API
                     except Exception as e:
                         logging.error(e)
@@ -394,7 +496,9 @@ class Query:
 
     async def leaderboard_info(self, platform, season, gamemode):
         # platform = self._check_platform(platform)
-        url = Route(url=gamemode, dataId=season, method=LEADERBOARD_ROUTE, platform=platform)
+        url = Route(
+            url=gamemode, dataId=season, method=LEADERBOARD_ROUTE, platform=platform
+        )
         resp = await self.request(url)
         with open("../debug/leaderboardresp.json", "w+") as out:
             json.dump(resp, out)
@@ -419,5 +523,7 @@ class Query:
                 result = "{}page[offset]={}&".format(result, filter.offset)
             # need to add more filters to distinguish between players, etc
         for k, v in filter.sorts:
-            result = "{}{}={}&".format(result, k, v)  # append to the current result a key value pair
+            result = "{}{}={}&".format(
+                result, k, v
+            )  # append to the current result a key value pair
         return result[:-1]  # trim the result to remove trailing &

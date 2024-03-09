@@ -20,5 +20,6 @@ class InvalidAPIKey(PUBGError):
 class InvalidPlayerID(PUBGError):
     pass
 
+
 class InvalidObject(Exception):
     pass

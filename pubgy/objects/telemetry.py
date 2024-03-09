@@ -40,7 +40,6 @@ class Telemetry:
         """
         return self._check_if_exist("events")
 
-
     def _check_if_exist(self, info):
         """
 
@@ -55,4 +54,3 @@ class Telemetry:
             return self._data[info]
         elif self._data["sorted"] is False:
             self.calculate_events()
-

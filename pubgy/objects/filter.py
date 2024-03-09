@@ -1,6 +1,14 @@
 class Filter:  # likely to remove
 
-    def __init__(self, sort=None, length=None, offset=None, matchId=None, username=None, userid=None):
+    def __init__(
+        self,
+        sort=None,
+        length=None,
+        offset=None,
+        matchId=None,
+        username=None,
+        userid=None,
+    ):
         # self.sort = sort
         self.length = length
         self.offset = offset

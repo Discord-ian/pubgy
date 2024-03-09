@@ -22,15 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Some of the contents from this file comes from https://github.com/pubg/api-assets
 """
-SHARD_LIST = [
-    "steam",
-    "kakao",
-    "tournament",
-    "psn",
-    "xbox",
-    "console",
-    "stadia"
-]
+
+SHARD_LIST = ["steam", "kakao", "tournament", "psn", "xbox", "console", "stadia"]
 PLATFORM_REGION = [
     "pc-as",
     "pc-eu",
@@ -51,7 +44,7 @@ PLATFORM_REGION = [
     "xbox-eu",
     "xbox-na",
     "xbox-oc",
-    "xbox-sa"
+    "xbox-sa",
 ]
 DEFAULT_SHARD = SHARD_LIST[0]
 BASE_URL = "https://api.pubg.com/shards/"
@@ -72,7 +65,7 @@ MAP_LIST = {
     "Savage_Main": "Sanhok",
     "Summerland_Main": "Karakin",
     "Heaven_Main": "Heaven",
-    "Chimera_Main": "Chimera"
+    "Chimera_Main": "Chimera",
 }
 GAME_MODES = {
     "duo": "Duo TPP",
@@ -106,15 +99,13 @@ GAME_MODES = {
     "war-squad": "Squad TPP",
     "war-squad-fpp": "War Squad FPP",
     "zombie-duo": "Zombie Duo TPP",
-    "zombie-duo-fpp":"Zombie Duo FPP",
+    "zombie-duo-fpp": "Zombie Duo FPP",
     "zombie-solo": "Zombie Solo TPP",
     "zombie-solo-fpp": "Zombie Solo FPP",
     "zombie-squad": "Zombie Squad TPP",
     "zombie-squad-fpp": "Zombie Squad FPP",
     "lab-tpp": "Lab TPP",
     "lab-fpp": "Lab FPP",
-    "tdm": "Team Deathmatch"
+    "tdm": "Team Deathmatch",
 }
-STATS = {
-    "all": "lifetime"
-}
+STATS = {"all": "lifetime"}

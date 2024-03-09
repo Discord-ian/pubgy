@@ -8,7 +8,17 @@ class Match:
     Returned whenever :func:`pubgy.client.matches` is called.
     """
 
-    def __init__(self, matchID, participants, shard, winners, telemetry, map, matchType=None, gameMode=None):
+    def __init__(
+        self,
+        matchID,
+        participants,
+        shard,
+        winners,
+        telemetry,
+        map,
+        matchType=None,
+        gameMode=None,
+    ):
         # TODO: matchType != gameMode
         """
         :param matchID: The match id

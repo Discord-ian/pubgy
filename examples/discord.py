@@ -14,6 +14,11 @@ async def on_ready():
 @commands.command()
 async def match(match_id=None):
     match = await pubg.matches(match_id=match_id)
-    await bot.say("Match occured on {} shard. The first player was {}.".format(match.shard, match.players[0].name))
+    await bot.say(
+        "Match occured on {} shard. The first player was {}.".format(
+            match.shard, match.players[0].name
+        )
+    )
+
 
 bot.run("YOUR BOT TOKEN HERE")
